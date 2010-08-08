@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet type="text/css"
+  href="chrome://charlifter/skin/lifter.css" ?>
+
+<!DOCTYPE overlay SYSTEM "chrome://charlifter/locale/lifter.dtd">
+
+<overlay id     = "charlifter-browser-overlay"
+        xmlns   = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script type    = "application/x-javascript"
+        src         = "chrome://charlifter/content/lifter.js" />
+
+    <stringbundleset id     = "stringbundleset">
+        <stringbundle id    = "charlifter-string-bundle"
+            src             = "chrome://charlifter/locale/lifter.properties" />
+    </stringbundleset>
+
+    <menupopup id           = "contentAreaContextMenu">
+        <menuitem id        = "charlifter-cmenu-item-lift"
+            label           = "&charlifter.lift.label;"
+            accesskey       = "&charlifter.lift.accesskey;"
+            oncommand       = "Charlifter.Lifter.liftSelection('es');"
+        />
+        <menu id            = "charlifter-cmenu-languages-item"
+            label           = "&charlifter.languages.label;"
+            >
+            <menupopup>
+            </menupopup>
+        </menu>
+    </menupopup>
+</overlay>

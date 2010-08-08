@@ -1,0 +1,5 @@
+content   charlifter              jar:chrome/charlifter.jar!/content/
+skin      charlifter  classic/1.0 jar:chrome/charlifter.jar!/skin/
+locale    charlifter  en-US       jar:chrome/charlifter.jar!/locale/en-US/
+
+overlay chrome://browser/content/browser.xul  chrome://charlifter/content/lifter.xul
