@@ -107,15 +107,16 @@ Charlifter.Lifter = {
             let response = JSON.parse(aSuccess.target.responseText)
             switch (response.code) {
                 case this.codes.lift-success:
-                    focused.value       = response.text;
-                    focused.disabled    = false;
+                    focused.value = response.text;
                     break;
                 case this.codes.lift-fail-unknown:
                     break;
                 default:
                     break;
             }
+            focused.disabled = false;
         }, function(aError) {
+            focused.disabled = false;
             window.alert("Failure with call: " + request._call);
         });
     },
