@@ -7,12 +7,11 @@ if ("undefined" == typeof(Charlifter)) {
 };
 
 Charlifter.Lifter = {
-
-    codes : {
+    codes : { // API Response Codes
           lang-list-outdated : 100
         , lang-list-current  : 200
         , lang-list-overnew  : 400
-    }
+    },
 
     init : function() {
         /* Create dynamic menu of available */
@@ -34,7 +33,7 @@ Charlifter.Lifter = {
                         ));
                     }
                     break;
-                case this.codes.lang-list-current: // List version == Server version
+                case this.codes.lang-list-current: // List version == erver version
                     break;
                 case this.codes.lang-list-overnew: // List version >  Server version
                     break;
@@ -47,6 +46,7 @@ Charlifter.Lifter = {
     },
 
     readyContextMenu : function(aE) {
+        /* Hide context menu elements where appropriate */
         var lift            = document.getElementById("charlifter-cmenu-item-lift");
         var langsItem       = document.getElementById("charlifter-cmenu-languages-item");
         lift.hidden         = !(gContextMenu.onTextInput);
@@ -54,6 +54,7 @@ Charlifter.Lifter = {
     },
 
     genRequest : function(args, success, error) {
+        /* Abstracts API calling code */
         var url = "http://ares:1932/";
         var request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -66,6 +67,7 @@ Charlifter.Lifter = {
     },
 
     getLangs : function(success, error) {
+        /* API Call: Get language list */
         let prefs = Components.classes["@mozilla.org/preferences-service;1"]
             .getService(Components.interfaces.nsIPrefService);
         let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
@@ -82,6 +84,7 @@ Charlifter.Lifter = {
     },
 
     lift : function(lang, text, success, error) {
+        /* API Call: Lift text */
         request = this.genRequest({
               call: "charlifter.lift"
             , lang: lang
@@ -91,6 +94,7 @@ Charlifter.Lifter = {
     },
 
     liftSelection : function(lang) {
+        /* Makes lift function specific to form element */
         var focused = document.commandDispatcher.focusedElement;
         focused.disabled = true;
         this.lift(lang, focused.value, function(aSuccess) {
