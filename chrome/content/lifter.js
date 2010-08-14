@@ -15,12 +15,16 @@ Charlifter.Lifter = {
     }
 
     init : function() {
+        /* Create dynamic menu of available */
         var contextMenu = document.getElementById("contentAreaContextMenu");
         contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
         this.getLangs(function(aEvent) {
             response = JSON.parse(aEvent.target.responseText)
+            // TODO: Render menu from sqlite
             switch(response.code) {
-                case this.codes.lang-list-outdated:
+                case this.codes.lang-list-outdated: // List version <  Server version
+                    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages");
                     let langs = response.text.split('\n').split(':'); // [["es", "Espanol"], ["fr", "Francois"]]
                     let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
                     for (langPair in langs) {
@@ -30,9 +34,9 @@ Charlifter.Lifter = {
                         ));
                     }
                     break;
-                case this.codes.lang-list-current:
+                case this.codes.lang-list-current: // List version == Server version
                     break;
-                case this.codes.lang-list-overnew:
+                case this.codes.lang-list-overnew: // List version >  Server version
                     break;
                 default:
                     break;
@@ -64,10 +68,14 @@ Charlifter.Lifter = {
     getLangs : function(success, error) {
         let prefs = Components.classes["@mozilla.org/preferences-service;1"]
             .getService(Components.interfaces.nsIPrefService);
-        let locale = prefs.getBranch("general.useragent.").getCharPref("locale");
+        let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
+        let version = 0; // If the browser locale has changed, we need a new list
+        if (locale != prefs.getBranch("charlifter.languages.").getCharPref("locale")) {
+            version = prefs.getBranch("charlifter.languages.").getIntPref("version")
+        }
         request = this.genRequest({
               call:     "charlifter.langs"
-            , version:  0       // TODO: Use in preferences
+            , version:  version
             , locale:   locale
         }, success, error);
         request.send(request._call);
