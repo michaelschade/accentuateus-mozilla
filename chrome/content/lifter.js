@@ -8,20 +8,22 @@ if ("undefined" == typeof(Charlifter)) {
 
 Charlifter.Lifter = {
     codes : { // API Response Codes
-          lang-list-outdated : 100
-        , lang-list-current  : 200
-        , lang-list-overnew  : 400
+          lift-success      : 200
+        , lift-fail-unknown : 400
+        , lang-list-outdated: 100
+        , lang-list-current : 200
+        , lang-list-overnew : 400
     },
 
     init : function() {
         /* Create dynamic menu of available */
         var contextMenu = document.getElementById("contentAreaContextMenu");
         contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
-        this.getLangs(function(aEvent) {
-            response = JSON.parse(aEvent.target.responseText)
+        this.getLangs(function(aSuccess) {
+            response = JSON.parse(aSuccess.target.responseText)
             // TODO: Render menu from sqlite
             switch(response.code) {
-                case this.codes.lang-list-outdated: // List version <  Server version
+                case this.codes.lang-list-outdated:
                     let prefs = Components.classes["@mozilla.org/preferences-service;1"]
                         .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages");
                     let langs = response.text.split('\n').split(':'); // [["es", "Espanol"], ["fr", "Francois"]]
@@ -33,9 +35,9 @@ Charlifter.Lifter = {
                         ));
                     }
                     break;
-                case this.codes.lang-list-current: // List version == erver version
+                case this.codes.lang-list-current:
                     break;
-                case this.codes.lang-list-overnew: // List version >  Server version
+                case this.codes.lang-list-overnew:
                     break;
                 default:
                     break;
@@ -85,10 +87,14 @@ Charlifter.Lifter = {
 
     lift : function(lang, text, success, error) {
         /* API Call: Lift text */
+        let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+            .getService(Components.interfaces.nsIPrefService);
+        let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
         request = this.genRequest({
-              call: "charlifter.lift"
-            , lang: lang
-            , text: text
+              call:     "charlifter.lift"
+            , lang:     lang
+            , text:     text
+            , locale:   locale
         }, success, error);
         request.send(request._call);
     },
@@ -98,8 +104,17 @@ Charlifter.Lifter = {
         var focused = document.commandDispatcher.focusedElement;
         focused.disabled = true;
         this.lift(lang, focused.value, function(aSuccess) {
-            focused.value       = JSON.parse(aSuccess.target.responseText).text;
-            focused.disabled    = false;
+            let response = JSON.parse(aSuccess.target.responseText)
+            switch (response.code) {
+                case this.codes.lift-success:
+                    focused.value       = response.text;
+                    focused.disabled    = false;
+                    break;
+                case this.codes.lift-fail-unknown:
+                    break;
+                default:
+                    break;
+            }
         }, function(aError) {
             window.alert("Failure with call: " + request._call);
         });
