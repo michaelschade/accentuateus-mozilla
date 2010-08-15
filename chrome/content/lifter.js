@@ -75,7 +75,6 @@ Charlifter.Lifter = {
         this.getLangs(function(aSuccess) {
             let owner = Charlifter.Lifter;
             response = JSON.parse(aSuccess.target.responseText);
-            // TODO: Render menu from sqlite
             switch(response.code) {
                 case owner.codes.langListOutdated:
                     /* New list available. Clear old languages and insert new list to database. */
