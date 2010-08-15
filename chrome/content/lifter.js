@@ -146,7 +146,7 @@ Charlifter.Lifter = {
             ]
         ));
         liftItem.setAttribute("oncommand",
-            "Charlifter.Lifter.liftSelection('" + "es" + "');"
+            "Charlifter.Lifter.liftSelection('" + prefs.getCharPref("selection-code") + "');"
         );
         let langsItem       = document.getElementById("charlifter-cmenu-languages-item");
         liftItem.hidden     = !(gContextMenu.onTextInput);
@@ -196,7 +196,7 @@ Charlifter.Lifter = {
             , locale:   locale
         }, success, error);
         request.send(request._call);
-        // TODO: SQL lookup for localization
+        /* Store last used language code and localization in preferences */
         let cprefs  = prefs.getBranch("charlifter.languages.");
         Charlifter.SQL.getLangLocalization(lang, {
             handleResult: function(aResult) {
