@@ -108,9 +108,13 @@ Charlifter.Lifter = {
         let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
         Charlifter.SQL.getLangs({
             handleResult: function(aResultSet) {
+                let strbundle = document.getElementById("charlifter-string-bundle");
                 for (let row=aResultSet.getNextRow(); row; row=aResultSet.getNextRow()) {
                     let ele = langsMenu.appendItem(
-                          row.getResultByName("localization") + ": " + row.getResultByName("code")
+                          strbundle.getFormattedString("lift-csubmenu-item-label", [
+                                row.getResultByName("localization")
+                              , row.getResultByName("code")
+                          ])
                         , row.getResultByName("code")
                     );
                     ele.setAttribute("oncommand",
@@ -131,7 +135,7 @@ Charlifter.Lifter = {
         let strbundle       = document.getElementById("charlifter-string-bundle");
         let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
         liftItem.setAttribute("label", strbundle.getFormattedString(
-            "lift-item-label", [prefs.getCharPref("selection-localized"), prefs.getCharPref("selection-code")]
+            "lift-citem-label", [prefs.getCharPref("selection-localized"), prefs.getCharPref("selection-code")]
         ));
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('" + "es" + "');"

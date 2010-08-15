@@ -19,11 +19,10 @@
 
     <menupopup id           = "contentAreaContextMenu">
         <menuitem id        = "charlifter-cmenu-item-lift"
-            accesskey       = "&charlifter.lift.accesskey;"
-            oncommand       = "Charlifter.Lifter.liftSelection('es');"
+            accesskey       = "&charlifter.citem.accesskey;"
         />
         <menu id            = "charlifter-cmenu-languages-item"
-            label           = "&charlifter.languages.label;"
+            label           = "&charlifter.csubmenu.label;"
             >
             <menupopup>
             </menupopup>

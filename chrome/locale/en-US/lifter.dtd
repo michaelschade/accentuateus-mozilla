@@ -1,4 +1,5 @@
-<!ENTITY charlifter.lift.label      "Lift Text">
-<!ENTITY charlifter.lift.accesskey  "l">
+<!-- Context menu entry to lift last used language -->
+<!ENTITY charlifter.citem.accesskey  "L">
 
-<!ENTITY charlifter.languages.label "Lift Text for Language">
+<!-- Context menu's submenu containing all available languages -->
+<!ENTITY charlifter.csubmenu.label "Lift Text For...">
