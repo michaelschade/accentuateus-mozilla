@@ -5,6 +5,7 @@ if ("undefined" == typeof(Charlifter)) {
 Charlifter.SQL = {
     db : null,
     connect : function() {
+        /* Connects to sqlite file if not already done so */
         if (this.db == null) {
             let file = Components.classes["@mozilla.org/file/directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
@@ -12,7 +13,8 @@ Charlifter.SQL = {
             file.append("charlifter.sqlite");
             let storageService = Components.classes["@mozilla.org/storage/service;1"]
                                     .getService(Components.interfaces.mozIStorageService);
-            this.db = storageService.openDatabase(file);
+            this.db = storageService.openDatabase(file); // Make database file if not found
+            // Initialize lang table if not in existence
             let statement = this.query(
                 "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5), localization VARCHAR(255))"
             );
@@ -20,14 +22,17 @@ Charlifter.SQL = {
         }
     },
     query : function(query) {
+        /* Connects to db if necessary and creates query statement */
         if (this.db == null) this.connect();
         return this.db.createStatement(query);
     },
     clearLangs : function(callbacks) {
+        /* Clears languages from database. */
         let statement = this.query("DELETE FROM langs");
         statement.executeAsync(callbacks);
     },
     newLangs : function(langs, callbacks) {
+        /* Takes languages as [[ISO-639, Localized Name], [ISO 639, Localized Name], ...] */
         let statement = this.query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
         let params = statement.newBindingParamsArray();
         for (let lang in langs) {
@@ -36,11 +41,11 @@ Charlifter.SQL = {
             bp.bindByName("localization",langs[lang][1]);
             params.addParams(bp);
         }
-        window.alert(1);
         statement.bindParameters(params);
         statement.executeAsync(callbacks);
     },
     getLangs : function(callbacks) {
+        /* Return languages. */
         let statement = this.query("SELECT code, localization FROM langs");
         statement.executeAsync(callbacks);
     },
@@ -73,16 +78,21 @@ Charlifter.Lifter = {
             // TODO: Render menu from sqlite
             switch(response.code) {
                 case owner.codes.langListOutdated:
-                    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+                    /* New list available. Clear old languages and insert new list to database. */
                     let langs = response.text.split(','); // TODO: [["es", "Espanol"], ["fr", "Francois"]]
-                    let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
                     for (let langPair in langs) {
-                        let ele = langsMenu.appendItem(langs[langPair], langs[langPair]);
-                        ele.setAttribute("oncommand",
-                            "Charlifter.Lifter.liftSelection('" + langs[langPair] + "');"
-                        );
+                        langs[langPair] = [langs[langPair], "Spanish"]; // TODO: Get localized value
                     }
+                    Charlifter.SQL.clearLangs({
+                        handleError: function(aError) {
+                            window.alert("Error with clearing languages.");
+                        }
+                    });
+                    Charlifter.SQL.newLangs(langs, {
+                        handleError: function(aError) {
+                            window.alert("Error with adding new languages.");
+                        },
+                    });
                     break;
                 case owner.codes.langListCurrent:
                     break;
@@ -93,6 +103,24 @@ Charlifter.Lifter = {
             }
         }, function(aError) {
             window.alert("Failure with call: " + request._call);
+        });
+        /* Populate language list menu. */
+        let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
+        Charlifter.SQL.getLangs({
+            handleResult: function(aResultSet) {
+                for (let row=aResultSet.getNextRow(); row; row=aResultSet.getNextRow()) {
+                    let ele = langsMenu.appendItem(
+                          row.getResultByName("localization") + ": " + row.getResultByName("code")
+                        , row.getResultByName("code")
+                    );
+                    ele.setAttribute("oncommand",
+                        "Charlifter.Lifter.liftSelection('" + row.getResultByName("code") + "');"
+                    );
+                }
+            },
+            handleError: function(aError) {
+                window.alert("Error with retrieving languages for menu generation.");
+            },
         });
     },
 
