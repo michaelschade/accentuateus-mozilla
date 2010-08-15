@@ -49,6 +49,12 @@ Charlifter.SQL = {
         let statement = this.query("SELECT code, localization FROM langs");
         statement.executeAsync(callbacks);
     },
+    getLangLocalization : function(code, callbacks) {
+        /* Provides stored language localization when provided ISO 639 code. */
+        let statement = this.query("SELECT localization FROM langs WHERE code == :code LIMIT 1");
+        statement.params.code = code;
+        statement.executeAsync(callbacks);
+    },
 }
 
 Charlifter.Lifter = {
@@ -63,12 +69,12 @@ Charlifter.Lifter = {
     init : function() {
         /* Create dynamic menu of available */
         /* TODO: REMOVE THIS PREFERENCE SETTING */
-        //    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-        //        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
-        //    prefs.setCharPref("selection-code", "es");
-        //    prefs.setCharPref("selection-localized", "Spanish");
-        //    prefs.setIntPref("version", 1);
-        //    prefs.setCharPref("locale", "en-US");
+            let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+            prefs.setCharPref("selection-code", "es");
+            prefs.setCharPref("selection-localized", "Spanish");
+            prefs.setIntPref("version", 1);
+            prefs.setCharPref("locale", "en-US");
         /* TODO: REMOVE THIS PREFERENCE SETTING */
         let contextMenu = document.getElementById("contentAreaContextMenu");
         contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
@@ -134,7 +140,10 @@ Charlifter.Lifter = {
         let strbundle       = document.getElementById("charlifter-string-bundle");
         let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
         liftItem.setAttribute("label", strbundle.getFormattedString(
-            "lift-citem-label", [prefs.getCharPref("selection-localized"), prefs.getCharPref("selection-code")]
+            "lift-citem-label", [
+                  prefs.getCharPref("selection-localized")
+                , prefs.getCharPref("selection-code")
+            ]
         ));
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('" + "es" + "');"
@@ -179,9 +188,6 @@ Charlifter.Lifter = {
         /* API Call: Lift text */
         let prefs = Components.classes["@mozilla.org/preferences-service;1"]
             .getService(Components.interfaces.nsIPrefService);
-        let cprefs  = prefs.getBranch("charlifter.languages.");
-        cprefs.setCharPref("selection-code", lang);
-        // TODO: SQL lookup for localization
         let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
         request = this.genRequest({
               call:     "charlifter.lift"
@@ -190,6 +196,19 @@ Charlifter.Lifter = {
             , locale:   locale
         }, success, error);
         request.send(request._call);
+        // TODO: SQL lookup for localization
+        let cprefs  = prefs.getBranch("charlifter.languages.");
+        Charlifter.SQL.getLangLocalization(lang, {
+            handleResult: function(aResult) {
+                cprefs.setCharPref("selection-localized"
+                    , aResult.getNextRow().getResultByName("localization")
+                );
+                cprefs.setCharPref("selection-code", lang);
+            },
+            handleError: function(aError) {
+                window.alert("Error with getting language localization.");
+            },
+        });
     },
 
     liftSelection : function(lang) {
