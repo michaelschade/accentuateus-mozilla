@@ -3,9 +3,9 @@ if ("undefined" == typeof(Charlifter)) {
 };
 
 Charlifter.SQL = {
-    db        : null,
-    connect   : function() {
-        if (this.db != null) {
+    db : null,
+    connect : function() {
+        if (this.db == null) {
             let file = Components.classes["@mozilla.org/file/directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
                          .get("ProfD", Components.interfaces.nsIFile);
@@ -13,7 +13,38 @@ Charlifter.SQL = {
             let storageService = Components.classes["@mozilla.org/storage/service;1"]
                                     .getService(Components.interfaces.mozIStorageService);
             this.db = storageService.openDatabase(file);
+            let statement = this.query(
+                "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5), localization VARCHAR(255))"
+            );
+            statement.executeAsync();
         }
+    },
+    query : function(query) {
+        if (this.db == null) this.connect();
+        return this.db.createStatement(query);
+    },
+    clearLangs : function(callbacks) {
+        let statement = this.query("DELETE * FROM langs");
+        statement.executeAsync(callbacks);
+    },
+    newLangs : function(langs, callbacks) {
+        let statement = this.query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
+        let params = statement.newBindingParamsArray();
+        for (let lang in langs) {
+            // TODO: Better way to add multiple params?
+            let code            = params.newBindingParams();
+            let localization    = params.newBindingParams();
+            code.bindByName         ("code",        langs[lang][0]);
+            localization.bindByName ("localization",langs[lang][1]);
+            params.addParam(code);
+            params.addParam(localization);
+        }
+        statement.statementbindParameters(params);
+        statement.executeAsync(callbacks);
+    },
+    getLangs : function(callbacks) {
+        let statement = this.query("SELECT code, localization FROM langs");
+        statement.executeAsync(callbacks);
     },
 }
 
