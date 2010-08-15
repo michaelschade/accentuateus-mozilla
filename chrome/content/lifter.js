@@ -31,15 +31,13 @@ Charlifter.SQL = {
         let statement = this.query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
         let params = statement.newBindingParamsArray();
         for (let lang in langs) {
-            // TODO: Better way to add multiple params?
-            let code            = params.newBindingParams();
-            let localization    = params.newBindingParams();
-            code.bindByName         ("code",        langs[lang][0]);
-            localization.bindByName ("localization",langs[lang][1]);
-            params.addParam(code);
-            params.addParam(localization);
+            let bp = params.newBindingParams();
+            bp.bindByName("code",        langs[lang][0]);
+            bp.bindByName("localization",langs[lang][1]);
+            params.addParams(bp);
         }
-        statement.statementbindParameters(params);
+        window.alert(1);
+        statement.bindParameters(params);
         statement.executeAsync(callbacks);
     },
     getLangs : function(callbacks) {
