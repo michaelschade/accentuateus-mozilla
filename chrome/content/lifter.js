@@ -2,6 +2,21 @@ if ("undefined" == typeof(Charlifter)) {
     var Charlifter = {};
 };
 
+Charlifter.SQL = {
+    db        : null,
+    connect   : function() {
+        if (this.db != null) {
+            let file = Components.classes["@mozilla.org/file/directory_service;1"]
+                         .getService(Components.interfaces.nsIProperties)
+                         .get("ProfD", Components.interfaces.nsIFile);
+            file.append("charlifter.sqlite");
+            let storageService = Components.classes["@mozilla.org/storage/service;1"]
+                                    .getService(Components.interfaces.mozIStorageService);
+            this.db = storageService.openDatabase(file);
+        }
+    },
+}
+
 Charlifter.Lifter = {
     codes : { // API Response Codes
           liftSuccess       : 200
@@ -58,7 +73,6 @@ Charlifter.Lifter = {
             .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
         let strbundle       = document.getElementById("charlifter-string-bundle");
         let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
-        // TODO: Make this actually use preferences, default preferences especially.
         liftItem.setAttribute("label", strbundle.getFormattedString(
             "lift-item-label", [prefs.getCharPref("selection-localized"), prefs.getCharPref("selection-code")]
         ));
@@ -105,6 +119,9 @@ Charlifter.Lifter = {
         /* API Call: Lift text */
         let prefs = Components.classes["@mozilla.org/preferences-service;1"]
             .getService(Components.interfaces.nsIPrefService);
+        let cprefs  = prefs.getBranch("charlifter.languages.");
+        cprefs.setCharPref("selection-code", lang);
+        // TODO: SQL lookup for localization
         let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
         request = this.genRequest({
               call:     "charlifter.lift"
