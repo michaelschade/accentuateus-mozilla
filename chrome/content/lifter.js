@@ -14,12 +14,12 @@ Charlifter.Lifter = {
     init : function() {
         /* Create dynamic menu of available */
         /* TODO: REMOVE THIS PREFERENCE SETTING */
-            let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
-            prefs.setCharPref("selection-code", "es");
-            prefs.setCharPref("selection-localized", "Spanish");
-            prefs.setIntPref("version", 1);
-            prefs.setCharPref("locale", "en-US");
+        //    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+        //        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+        //    prefs.setCharPref("selection-code", "es");
+        //    prefs.setCharPref("selection-localized", "Spanish");
+        //    prefs.setIntPref("version", 1);
+        //    prefs.setCharPref("locale", "en-US");
         /* TODO: REMOVE THIS PREFERENCE SETTING */
         let contextMenu = document.getElementById("contentAreaContextMenu");
         contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
@@ -120,12 +120,13 @@ Charlifter.Lifter = {
         let focused = document.commandDispatcher.focusedElement;
         focused.disabled = true;
         this.lift(lang, focused.value, function(aSuccess) {
+            let owner = Charlifter.Lifter;
             let response = JSON.parse(aSuccess.target.responseText);
             switch (response.code) {
-                case this.codes.liftSuccess:
+                case owner.codes.liftSuccess:
                     focused.value = response.text;
                     break;
-                case this.codes.liftFailUnknown:
+                case owner.codes.liftFailUnknown:
                     break;
                 default:
                     break;
