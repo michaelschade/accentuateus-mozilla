@@ -24,7 +24,7 @@ Charlifter.SQL = {
         return this.db.createStatement(query);
     },
     clearLangs : function(callbacks) {
-        let statement = this.query("DELETE * FROM langs");
+        let statement = this.query("DELETE FROM langs");
         statement.executeAsync(callbacks);
     },
     newLangs : function(langs, callbacks) {
