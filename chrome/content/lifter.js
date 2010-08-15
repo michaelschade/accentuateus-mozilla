@@ -1,43 +1,48 @@
-window.addEventListener("load", function() {
-        Charlifter.Lifter.init();
-    }, false);
-
 if ("undefined" == typeof(Charlifter)) {
     var Charlifter = {};
 };
 
 Charlifter.Lifter = {
     codes : { // API Response Codes
-          lift-success      : 200
-        , lift-fail-unknown : 400
-        , lang-list-outdated: 100
-        , lang-list-current : 200
-        , lang-list-overnew : 400
+          liftSuccess       : 200
+        , liftFailUnknown   : 400
+        , langListOutdated  : 100
+        , langListCurrent   : 200
+        , langListOvernew   : 400
     },
 
     init : function() {
         /* Create dynamic menu of available */
-        var contextMenu = document.getElementById("contentAreaContextMenu");
+        /* TODO: REMOVE THIS PREFERENCE SETTING */
+            let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+            prefs.setCharPref("selection-code", "es");
+            prefs.setCharPref("selection-localized", "Spanish");
+            prefs.setIntPref("version", 1);
+            prefs.setCharPref("locale", "en-US");
+        /* TODO: REMOVE THIS PREFERENCE SETTING */
+        let contextMenu = document.getElementById("contentAreaContextMenu");
         contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
         this.getLangs(function(aSuccess) {
-            response = JSON.parse(aSuccess.target.responseText)
+            let owner = Charlifter.Lifter;
+            response = JSON.parse(aSuccess.target.responseText);
             // TODO: Render menu from sqlite
             switch(response.code) {
-                case this.codes.lang-list-outdated:
+                case owner.codes.langListOutdated:
                     let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages");
-                    let langs = response.text.split('\n').split(':'); // [["es", "Espanol"], ["fr", "Francois"]]
+                        .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+                    let langs = response.text.split(','); // TODO: [["es", "Espanol"], ["fr", "Francois"]]
                     let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
-                    for (langPair in langs) {
-                        let ele = langsMenu.appendItem(langPair[0], langPair[1]);
-                        ele.setAttribute("oncommand", String.format(
-                            "Charlifter.Lifter.liftSelection('%s');", langPair[0]
-                        ));
+                    for (let langPair in langs) {
+                        let ele = langsMenu.appendItem(langs[langPair], langs[langPair]);
+                        ele.setAttribute("oncommand",
+                            "Charlifter.Lifter.liftSelection('" + langs[langPair] + "');"
+                        );
                     }
                     break;
-                case this.codes.lang-list-current:
+                case owner.codes.langListCurrent:
                     break;
-                case this.codes.lang-list-overnew:
+                case owner.codes.langListOvernew:
                     break;
                 default:
                     break;
@@ -49,16 +54,26 @@ Charlifter.Lifter = {
 
     readyContextMenu : function(aE) {
         /* Hide context menu elements where appropriate */
-        var lift            = document.getElementById("charlifter-cmenu-item-lift");
-        var langsItem       = document.getElementById("charlifter-cmenu-languages-item");
-        lift.hidden         = !(gContextMenu.onTextInput);
+        let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+            .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
+        let strbundle       = document.getElementById("charlifter-string-bundle");
+        let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
+        // TODO: Make this actually use preferences, default preferences especially.
+        liftItem.setAttribute("label", strbundle.getFormattedString(
+            "lift-item-label", [prefs.getCharPref("selection-localized"), prefs.getCharPref("selection-code")]
+        ));
+        liftItem.setAttribute("oncommand",
+            "Charlifter.Lifter.liftSelection('" + "es" + "');"
+        );
+        let langsItem       = document.getElementById("charlifter-cmenu-languages-item");
+        liftItem.hidden     = !(gContextMenu.onTextInput);
         langsItem.hidden    = !(gContextMenu.onTextInput);
     },
 
     genRequest : function(args, success, error) {
         /* Abstracts API calling code */
-        var url = "http://ares:1932/";
-        var request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
+        let url = "http://ares:1932/";
+        let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
         request.onload  = success;
         request.onerror = error;
@@ -70,12 +85,13 @@ Charlifter.Lifter = {
 
     getLangs : function(success, error) {
         /* API Call: Get language list */
-        let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+        let prefs   = Components.classes["@mozilla.org/preferences-service;1"]
             .getService(Components.interfaces.nsIPrefService);
+        let cprefs  = prefs.getBranch("charlifter.languages.");
         let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
         let version = 0; // If the browser locale has changed, we need a new list
-        if (locale != prefs.getBranch("charlifter.languages.").getCharPref("locale")) {
-            version = prefs.getBranch("charlifter.languages.").getIntPref("version")
+        if (locale == cprefs.getCharPref("locale")) {
+            version = cprefs.getIntPref("version");
         }
         request = this.genRequest({
               call:     "charlifter.langs"
@@ -101,15 +117,15 @@ Charlifter.Lifter = {
 
     liftSelection : function(lang) {
         /* Makes lift function specific to form element */
-        var focused = document.commandDispatcher.focusedElement;
+        let focused = document.commandDispatcher.focusedElement;
         focused.disabled = true;
         this.lift(lang, focused.value, function(aSuccess) {
-            let response = JSON.parse(aSuccess.target.responseText)
+            let response = JSON.parse(aSuccess.target.responseText);
             switch (response.code) {
-                case this.codes.lift-success:
+                case this.codes.liftSuccess:
                     focused.value = response.text;
                     break;
-                case this.codes.lift-fail-unknown:
+                case this.codes.liftFailUnknown:
                     break;
                 default:
                     break;
@@ -121,3 +137,7 @@ Charlifter.Lifter = {
         });
     },
 };
+
+window.addEventListener("load", function() {
+        Charlifter.Lifter.init();
+    }, false);

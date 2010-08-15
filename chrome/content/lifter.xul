@@ -19,7 +19,6 @@
 
     <menupopup id           = "contentAreaContextMenu">
         <menuitem id        = "charlifter-cmenu-item-lift"
-            label           = "&charlifter.lift.label;"
             accesskey       = "&charlifter.lift.accesskey;"
             oncommand       = "Charlifter.Lifter.liftSelection('es');"
         />
