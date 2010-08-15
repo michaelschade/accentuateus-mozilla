@@ -2,60 +2,62 @@ if ("undefined" == typeof(Charlifter)) {
     var Charlifter = {};
 };
 
-Charlifter.SQL = {
-    db : null,
-    connect : function() {
+Charlifter.SQL = function() {
+    let db = null;
+    let connect = function() {
         /* Connects to sqlite file if not already done so */
-        if (this.db == null) {
+        if (db == null) {
             let file = Components.classes["@mozilla.org/file/directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
                          .get("ProfD", Components.interfaces.nsIFile);
             file.append("charlifter.sqlite");
             let storageService = Components.classes["@mozilla.org/storage/service;1"]
                                     .getService(Components.interfaces.mozIStorageService);
-            this.db = storageService.openDatabase(file); // Make database file if not found
+            db = storageService.openDatabase(file); // Make database file if not found
             // Initialize lang table if not in existence
-            let statement = this.query(
+            let statement = query(
                 "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5), localization VARCHAR(255))"
             );
             statement.executeAsync();
         }
-    },
-    query : function(query) {
+    };
+    let query = function(query) {
         /* Connects to db if necessary and creates query statement */
-        if (this.db == null) this.connect();
-        return this.db.createStatement(query);
-    },
-    clearLangs : function(callbacks) {
-        /* Clears languages from database. */
-        let statement = this.query("DELETE FROM langs");
-        statement.executeAsync(callbacks);
-    },
-    newLangs : function(langs, callbacks) {
-        /* Takes languages as [[ISO-639, Localized Name], [ISO 639, Localized Name], ...] */
-        let statement = this.query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
-        let params = statement.newBindingParamsArray();
-        for (let lang in langs) {
-            let bp = params.newBindingParams();
-            bp.bindByName("code",        langs[lang][0]);
-            bp.bindByName("localization",langs[lang][1]);
-            params.addParams(bp);
-        }
-        statement.bindParameters(params);
-        statement.executeAsync(callbacks);
-    },
-    getLangs : function(callbacks) {
-        /* Return languages. */
-        let statement = this.query("SELECT code, localization FROM langs");
-        statement.executeAsync(callbacks);
-    },
-    getLangLocalization : function(code, callbacks) {
-        /* Provides stored language localization when provided ISO 639 code. */
-        let statement = this.query("SELECT localization FROM langs WHERE code == :code LIMIT 1");
-        statement.params.code = code;
-        statement.executeAsync(callbacks);
-    },
-}
+        if (db == null) connect();
+        return db.createStatement(query);
+    };
+    return {
+        clearLangs : function(callbacks) {
+            /* Clears languages from database. */
+            let statement = query("DELETE FROM langs");
+            statement.executeAsync(callbacks);
+        },
+        newLangs : function(langs, callbacks) {
+            /* Takes languages as [[ISO-639, Localized Name], [ISO 639, Localized Name], ...] */
+            let statement = query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
+            let params = statement.newBindingParamsArray();
+            for (let lang in langs) {
+                let bp = params.newBindingParams();
+                bp.bindByName("code",        langs[lang][0]);
+                bp.bindByName("localization",langs[lang][1]);
+                params.addParams(bp);
+            }
+            statement.bindParameters(params);
+            statement.executeAsync(callbacks);
+        },
+        getLangs : function(callbacks) {
+            /* Return languages. */
+            let statement = query("SELECT code, localization FROM langs");
+            statement.executeAsync(callbacks);
+        },
+        getLangLocalization : function(code, callbacks) {
+            /* Provides stored language localization when provided ISO 639 code. */
+            let statement = query("SELECT localization FROM langs WHERE code == :code LIMIT 1");
+            statement.params.code = code;
+            statement.executeAsync(callbacks);
+        },
+    }
+}();
 
 Charlifter.Lifter = {
     codes : { // API Response Codes
