@@ -4,10 +4,14 @@ if ("undefined" == typeof(Charlifter)) {
 
 Charlifter.SQL = function() {
     let db = null;
+    let strbundle = document.getElementById("charlifter-string-bundle");
+    let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].
+        getService(Ci.nsIPromptService);
     let connect = function() {
         /* Connects to sqlite file if not already done so */
-        if (db == null) {
-            let file = Components.classes["@mozilla.org/file/directory_service;1"]
+        if (db === null) {
+            strbundle = document.getElementById("charlifter-string-bundle");
+            let file  = Components.classes["@mozilla.org/file/directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
                          .get("ProfD", Components.interfaces.nsIFile);
             file.append("charlifter.sqlite");
@@ -23,7 +27,7 @@ Charlifter.SQL = function() {
     };
     let query = function(query) {
         /* Connects to db if necessary and creates query statement */
-        if (db == null) connect();
+        if (db === null) { connect(); }
         return db.createStatement(query);
     };
     return {
@@ -65,9 +69,11 @@ Charlifter.Lifter = function() {
         , liftFailUnknown   : 400
         , langListOutdated  : 100
         , langListCurrent   : 200
-        , langListOvernew   : 400
     };
-    let genRequest = function(args, success, error) {
+    let strbundle   = null;
+    let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+        .getService(Ci.nsIPromptService);
+    let genRequest  = function(args, success, error) {
         /* Abstracts API calling code */
         let url = "http://ares:1932/";
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
@@ -81,6 +87,7 @@ Charlifter.Lifter = function() {
     };
     return {
         init : function() {
+            strbundle = document.getElementById("charlifter-string-bundle");
             /* Create dynamic menu of available languages */
             /* TODO: REMOVE THIS PREFERENCE SETTING */
                 let prefs = Components.classes["@mozilla.org/preferences-service;1"]
@@ -114,19 +121,19 @@ Charlifter.Lifter = function() {
                         break;
                     case codes.langListCurrent:
                         break;
-                    case codes.langListOvernew:
-                        break;
                     default:
+                        prompts.alert(window, strbundle.getString("errors-title")
+                            , strbundle.getString("errors-unknown"));
                         break;
                 }
             }, function(aError) {
-                window.alert("Failure with call: " + request._call);
+                prompts.alert(window, strbundle.getString("errors-title")
+                    , strbundle.getString("errors-unknown"));
             });
             /* Populate language list menu. */
             let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
             Charlifter.SQL.getLangs({
                 handleResult: function(aResultSet) {
-                    let strbundle = document.getElementById("charlifter-string-bundle");
                     for (let row=aResultSet.getNextRow(); row; row=aResultSet.getNextRow()) {
                         let ele = langsMenu.appendItem(
                               strbundle.getFormattedString("lift-csubmenu-item-label", [
@@ -136,12 +143,14 @@ Charlifter.Lifter = function() {
                             , row.getResultByName("code")
                         );
                         ele.setAttribute("oncommand",
-                            "Charlifter.Lifter.liftSelection('" + row.getResultByName("code") + "');"
-                        );
+                            "Charlifter.Lifter.liftSelection('" + row.getResultByName("code") + "')");
                     }
                 },
                 handleError: function(aError) {
-                    window.alert("Error with retrieving languages for menu generation.");
+                    prompts.alert(window
+                        , strbundle.getString("errors-context-menu-title")
+                        , strbundle.getString("errors-context-menu")
+                    );
                 },
             });
         },
@@ -149,7 +158,6 @@ Charlifter.Lifter = function() {
             /* Hide context menu elements where appropriate */
             let prefs = Components.classes["@mozilla.org/preferences-service;1"]
                 .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
-            let strbundle       = document.getElementById("charlifter-string-bundle");
             let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
             liftItem.setAttribute("label", strbundle.getFormattedString(
                 "lift-citem-label", [
@@ -158,8 +166,7 @@ Charlifter.Lifter = function() {
                 ]
             ));
             liftItem.setAttribute("oncommand",
-                "Charlifter.Lifter.liftSelection('" + prefs.getCharPref("selection-code") + "');"
-            );
+                "Charlifter.Lifter.liftSelection('" + prefs.getCharPref("selection-code") + "')");
             let langsItem       = document.getElementById("charlifter-cmenu-languages-item");
             liftItem.hidden     = !(gContextMenu.onTextInput);
             langsItem.hidden    = !(gContextMenu.onTextInput);
@@ -179,7 +186,15 @@ Charlifter.Lifter = function() {
                 , version:  version
                 , locale:   locale
             }, success, error);
-            request.send(request._call);
+            try {
+                request.send(request._call);
+            }
+            catch (err) {
+                prompts.alert(window
+                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-communication")
+                );
+            }
         },
         lift : function(lang, text, success, error) {
             /* API Call: Lift text */
@@ -192,7 +207,15 @@ Charlifter.Lifter = function() {
                 , text:     text
                 , locale:   locale
             }, success, error);
-            request.send(request._call);
+            try {
+                request.send(request._call);
+            }
+            catch (err) {
+                prompts.alert(window
+                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-communication")
+                );
+            }
             /* Store last used language code and localization in preferences */
             let cprefs  = prefs.getBranch("charlifter.languages.");
             Charlifter.SQL.getLangLocalization(lang, {
@@ -203,7 +226,8 @@ Charlifter.Lifter = function() {
                     cprefs.setCharPref("selection-code", lang);
                 },
                 handleError: function(aError) {
-                    window.alert("Error with getting language localization.");
+                    prompts.alert(window, strbundle.getString("errors-lang-localization-title")
+                        , strbundle.getString("errors-lang-localization"));
                 },
             });
         },
@@ -218,6 +242,7 @@ Charlifter.Lifter = function() {
                         focused.value = response.text;
                         break;
                     case codes.liftFailUnknown:
+                        prompts.alert(window, strbundle.getString("errors-title"), response.text);
                         break;
                     default:
                         break;
@@ -225,7 +250,8 @@ Charlifter.Lifter = function() {
                 focused.disabled = false;
             }, function(aError) {
                 focused.disabled = false;
-                window.alert("Failure with call: " + request._call);
+                prompts.alert(window, strbundle.getString("errors-lift-selection-title")
+                    , strbundle.getString("errors-lift-selection"));
             });
         },
     }
