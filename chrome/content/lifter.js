@@ -11,16 +11,20 @@ Charlifter.SQL = function() {
         /* Connects to sqlite file if not already done so */
         if (db === null) {
             strbundle = document.getElementById("charlifter-string-bundle");
-            let file  = Components.classes["@mozilla.org/file/directory_service;1"]
+            let file  = Components.classes["@mozilla.org/file/"
+                        + "directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
                          .get("ProfD", Components.interfaces.nsIFile);
             file.append("charlifter.sqlite");
-            let storageService = Components.classes["@mozilla.org/storage/service;1"]
-                                    .getService(Components.interfaces.mozIStorageService);
-            db = storageService.openDatabase(file); // Make database file if not found
+            let storageService = Components.classes["@mozilla.org/storage"
+                                 + "/service;1"]
+                                    .getService(Components.interfaces
+                                        .mozIStorageService);
+            db = storageService.openDatabase(file);
             // Initialize lang table if not in existence
             let statement = query(
-                "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5), localization VARCHAR(255))"
+                "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5)"
+                    + ", localization VARCHAR(255))"
             );
             statement.executeAsync();
         }
@@ -37,8 +41,10 @@ Charlifter.SQL = function() {
             statement.executeAsync(callbacks);
         },
         newLangs : function(langs, callbacks) {
-            /* Takes languages as [[ISO-639, Localized Name], [ISO 639, Localized Name], ...] */
-            let statement = query("INSERT INTO langs (code, localization) VALUES (:code, :localization)");
+            /* Takes languages as [[ISO-639, Localized Name],
+                [ISO 639, Localized Name], ...] */
+            let statement = query("INSERT INTO langs (code, localization)"
+                + " VALUES (:code, :localization)");
             let params = statement.newBindingParamsArray();
             for (let lang in langs) {
                 let bp = params.newBindingParams();
@@ -55,8 +61,9 @@ Charlifter.SQL = function() {
             statement.executeAsync(callbacks);
         },
         getLangLocalization : function(code, callbacks) {
-            /* Provides stored language localization when provided ISO 639 code. */
-            let statement = query("SELECT localization FROM langs WHERE code == :code LIMIT 1");
+            /* Provides stored lang localization when provided ISO 639 code. */
+            let statement = query("SELECT localization FROM langs WHERE code "
+                + "== :code LIMIT 1");
             statement.params.code = code;
             statement.executeAsync(callbacks);
         },
@@ -79,7 +86,8 @@ Charlifter.Lifter = function() {
     let genRequest  = function(args, success, error) {
         /* Abstracts API calling code */
         let url = "http://ares:1932/";
-        let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Ci.nsIXMLHttpRequest);
+        let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+            .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
         request.onload  = success;
         request.onerror = error;
@@ -99,7 +107,8 @@ Charlifter.Lifter = function() {
                 prefs.setCharPref("locale", "en-US");
             /* TODO: REMOVE THIS PREFERENCE SETTING */
             let contextMenu = document.getElementById("contentAreaContextMenu");
-            contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
+            contextMenu.addEventListener("popupshowing", this.readyContextMenu
+                , false);
             this.getLangs(function(aSuccess) {
                 let response = {};
                 try {
@@ -110,15 +119,19 @@ Charlifter.Lifter = function() {
                 }
                 switch(response.code) {
                     case codes.langListOutdated:
-                        /* New list available. Clear old languages and insert new list to database. */
-                        let langs = response.text.split(','); // TODO: [["es", "Espanol"], ["fr", "Francois"]]
+                        /* New list available. Clear old languages
+                            and insert new list to database. */
+                            // TODO: [["es", "Espanol"], ["fr", "Francois"]]
+                        let langs = response.text.split(',');
                         for (let langPair in langs) {
-                            langs[langPair] = [langs[langPair], "Spanish"]; // TODO: Get localized value
+                            // TODO: Get localized value
+                            langs[langPair] = [langs[langPair], "Spanish"];
                         }
                         Charlifter.SQL.clearLangs({
                             handleResult: function(aResultSet) {},
                             handleError: function(aError) {
-                                prompts.alert(window, strbundle.getString("errors-title")
+                                prompts.alert(window
+                                    , strbundle.getString("errors-title")
                                     , strbundle.getString("errors-unknown"));
                             },
                             handleCompletion: function(aCompletion) {},
@@ -126,7 +139,8 @@ Charlifter.Lifter = function() {
                         Charlifter.SQL.newLangs(langs, {
                             handleResult: function(aResultSet) {},
                             handleError: function(aError) {
-                                prompts.alert(window, strbundle.getString("errors-title")
+                                prompts.alert(window
+                                    , strbundle.getString("errors-title")
                                     , strbundle.getString("errors-unknown"));
                             },
                             handleCompletion: function(aCompletion) {},
@@ -135,7 +149,8 @@ Charlifter.Lifter = function() {
                     case codes.langListCurrent:
                         break;
                     default:
-                        prompts.alert(window, strbundle.getString("errors-title")
+                        prompts.alert(window
+                            , strbundle.getString("errors-title")
                             , strbundle.getString("errors-unknown"));
                         break;
                 }
@@ -144,19 +159,23 @@ Charlifter.Lifter = function() {
                     , strbundle.getString("errors-unknown"));
             });
             /* Populate language list menu. */
-            let langsMenu = document.getElementById("charlifter-cmenu-languages-item");
+            let langsMenu = document.getElementById(
+                "charlifter-cmenu-languages-item");
             Charlifter.SQL.getLangs({
                 handleResult: function(aResultSet) {
-                    for (let row=aResultSet.getNextRow(); row; row=aResultSet.getNextRow()) {
-                        let ele = langsMenu.appendItem(
-                              strbundle.getFormattedString("lift-csubmenu-item-label", [
-                                    row.getResultByName("localization")
-                                  , row.getResultByName("code")
-                              ])
-                            , row.getResultByName("code")
-                        );
-                        ele.setAttribute("oncommand",
-                            "Charlifter.Lifter.liftSelection('" + row.getResultByName("code") + "')");
+                    for (let row=aResultSet.getNextRow();
+                        row; row=aResultSet.getNextRow()) {
+                            let ele = langsMenu.appendItem(
+                                  strbundle.getFormattedString(
+                                    "lift-csubmenu-item-label", [
+                                        row.getResultByName("localization")
+                                      , row.getResultByName("code")
+                                  ])
+                                , row.getResultByName("code")
+                            );
+                            ele.setAttribute("oncommand",
+                                "Charlifter.Lifter.liftSelection('"
+                                    + row.getResultByName("code") + "')");
                     }
                 },
                 handleError: function(aError) {
@@ -170,7 +189,8 @@ Charlifter.Lifter = function() {
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
-            let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
+            let liftItem = document.getElementById(
+                "charlifter-cmenu-item-lift");
             liftItem.setAttribute("label", strbundle.getFormattedString(
                 "lift-citem-label", [
                       cprefs.getCharPref("selection-localized")
@@ -178,15 +198,18 @@ Charlifter.Lifter = function() {
                 ]
             ));
             liftItem.setAttribute("oncommand",
-                "Charlifter.Lifter.liftSelection('" + cprefs.getCharPref("selection-code") + "')");
-            let langsItem       = document.getElementById("charlifter-cmenu-languages-item");
-            liftItem.hidden     = !(gContextMenu.onTextInput);
-            langsItem.hidden    = !(gContextMenu.onTextInput);
+                "Charlifter.Lifter.liftSelection('"
+                    + cprefs.getCharPref("selection-code") + "')");
+            let langsItem    = document.getElementById(
+                "charlifter-cmenu-languages-item");
+            liftItem.hidden  = !(gContextMenu.onTextInput);
+            langsItem.hidden = !(gContextMenu.onTextInput);
         },
         getLangs : function(success, error) {
             /* API Call: Get language list */
-            let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
-            let version = 0; // If the browser locale has changed, we need a new list
+            let locale  = prefs.getBranch("general.useragent.")
+                .getCharPref("locale");
+            let version = 0; // Forces new list retrieval
             if (locale == cprefs.getCharPref("locale")) {
                 version = cprefs.getIntPref("version");
             }
@@ -207,7 +230,8 @@ Charlifter.Lifter = function() {
         },
         lift : function(lang, text, success, error) {
             /* API Call: Lift text */
-            let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
+            let locale = prefs.getBranch("general.useragent.")
+                .getCharPref("locale");
             request = genRequest({
                   call:     "charlifter.lift"
                 , lang:     lang
@@ -232,7 +256,8 @@ Charlifter.Lifter = function() {
                     cprefs.setCharPref("selection-code", lang);
                 },
                 handleError: function(aError) {
-                    prompts.alert(window, strbundle.getString("errors-lang-localization-title")
+                    prompts.alert(window
+                        , strbundle.getString("errors-lang-localization-title")
                         , strbundle.getString("errors-lang-localization"));
                 },
                 handleCompletion: function(aCompletion) {},
@@ -265,7 +290,8 @@ Charlifter.Lifter = function() {
                 focused.disabled = false;
             }, function(aError) {
                 focused.disabled = false;
-                prompts.alert(window, strbundle.getString("errors-lift-selection-title")
+                prompts.alert(window,
+                      strbundle.getString("errors-lift-selection-title")
                     , strbundle.getString("errors-lift-selection"));
             });
         },
