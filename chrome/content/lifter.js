@@ -4,13 +4,9 @@ if ("undefined" == typeof(Charlifter)) {
 
 Charlifter.SQL = function() {
     let db = null;
-    let strbundle = document.getElementById("charlifter-string-bundle");
-    let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"].
-        getService(Ci.nsIPromptService);
     let connect = function() {
         /* Connects to sqlite file if not already done so */
         if (db === null) {
-            strbundle = document.getElementById("charlifter-string-bundle");
             let file  = Components.classes["@mozilla.org/file/"
                         + "directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
