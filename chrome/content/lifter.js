@@ -70,6 +70,9 @@ Charlifter.Lifter = function() {
         , langListOutdated  : 100
         , langListCurrent   : 200
     };
+    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+        .getService(Components.interfaces.nsIPrefService);
+    let cprefs = prefs.getBranch("charlifter.languages.");
     let strbundle   = null;
     let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
@@ -90,8 +93,6 @@ Charlifter.Lifter = function() {
             strbundle = document.getElementById("charlifter-string-bundle");
             /* Create dynamic menu of available languages */
             /* TODO: REMOVE THIS PREFERENCE SETTING */
-                let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                    .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
                 prefs.setCharPref("selection-code", "es");
                 prefs.setCharPref("selection-localized", "Spanish");
                 prefs.setIntPref("version", 1);
@@ -156,26 +157,21 @@ Charlifter.Lifter = function() {
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
-            let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefService).getBranch("charlifter.languages.");
             let liftItem        = document.getElementById("charlifter-cmenu-item-lift");
             liftItem.setAttribute("label", strbundle.getFormattedString(
                 "lift-citem-label", [
-                      prefs.getCharPref("selection-localized")
-                    , prefs.getCharPref("selection-code")
+                      cprefs.getCharPref("selection-localized")
+                    , cprefs.getCharPref("selection-code")
                 ]
             ));
             liftItem.setAttribute("oncommand",
-                "Charlifter.Lifter.liftSelection('" + prefs.getCharPref("selection-code") + "')");
+                "Charlifter.Lifter.liftSelection('" + cprefs.getCharPref("selection-code") + "')");
             let langsItem       = document.getElementById("charlifter-cmenu-languages-item");
             liftItem.hidden     = !(gContextMenu.onTextInput);
             langsItem.hidden    = !(gContextMenu.onTextInput);
         },
         getLangs : function(success, error) {
             /* API Call: Get language list */
-            let prefs   = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefService);
-            let cprefs  = prefs.getBranch("charlifter.languages.");
             let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
             let version = 0; // If the browser locale has changed, we need a new list
             if (locale == cprefs.getCharPref("locale")) {
@@ -198,8 +194,6 @@ Charlifter.Lifter = function() {
         },
         lift : function(lang, text, success, error) {
             /* API Call: Lift text */
-            let prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefService);
             let locale  = prefs.getBranch("general.useragent.").getCharPref("locale");
             request = genRequest({
                   call:     "charlifter.lift"
@@ -217,7 +211,6 @@ Charlifter.Lifter = function() {
                 );
             }
             /* Store last used language code and localization in preferences */
-            let cprefs  = prefs.getBranch("charlifter.languages.");
             Charlifter.SQL.getLangLocalization(lang, {
                 handleResult: function(aResult) {
                     cprefs.setCharPref("selection-localized"
