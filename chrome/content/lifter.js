@@ -22,11 +22,10 @@ Charlifter.SQL = function() {
                                         .mozIStorageService);
             db = storageService.openDatabase(file);
             // Initialize lang table if not in existence
-            let statement = query(
+            db.executeSimpleSQL(
                 "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5)"
                     + ", localization VARCHAR(255))"
             );
-            statement.executeAsync();
         }
     };
     let query = function(query) {
@@ -96,6 +95,36 @@ Charlifter.Lifter = function() {
         request._call = JSON.stringify(args);
         return request;
     };
+    let populateLangsMenu = function() {
+        /* Populate language list menu. */
+        let langsMenu = document.getElementById(
+            "charlifter-cmenu-languages-item");
+        Charlifter.SQL.getLangs({
+            handleResult: function(aResultSet) {
+                for (let row=aResultSet.getNextRow();
+                    row; row=aResultSet.getNextRow()) {
+                        let ele = langsMenu.appendItem(
+                              strbundle.getFormattedString(
+                                "lift-csubmenu-item-label", [
+                                    row.getResultByName("localization")
+                                  , row.getResultByName("code")
+                              ])
+                            , row.getResultByName("code")
+                        );
+                        ele.setAttribute("oncommand",
+                            "Charlifter.Lifter.liftSelection('"
+                                + row.getResultByName("code") + "')");
+                }
+            },
+            handleError: function(aError) {
+                prompts.alert(window
+                    , strbundle.getString("errors-context-menu-title")
+                    , strbundle.getString("errors-context-menu")
+                );
+            },
+            handleCompletion: function(aCompletion) {},
+        });
+    };
     return {
         init : function() {
             strbundle = document.getElementById("charlifter-string-bundle");
@@ -139,52 +168,30 @@ Charlifter.Lifter = function() {
                         Charlifter.SQL.newLangs(langs, {
                             handleResult: function(aResultSet) {},
                             handleError: function(aError) {
+                                populateLangsMenu();
                                 prompts.alert(window
                                     , strbundle.getString("errors-title")
                                     , strbundle.getString("errors-unknown"));
                             },
-                            handleCompletion: function(aCompletion) {},
+                            handleCompletion: function(aCompletion) {
+                                populateLangsMenu();
+                            },
                         });
                         break;
                     case codes.langListCurrent:
+                        populateLangsMenu();
                         break;
                     default:
+                        populateLangsMenu();
                         prompts.alert(window
                             , strbundle.getString("errors-title")
                             , strbundle.getString("errors-unknown"));
                         break;
                 }
             }, function(aError) {
+                populateLangsMenu();
                 prompts.alert(window, strbundle.getString("errors-title")
                     , strbundle.getString("errors-unknown"));
-            });
-            /* Populate language list menu. */
-            let langsMenu = document.getElementById(
-                "charlifter-cmenu-languages-item");
-            Charlifter.SQL.getLangs({
-                handleResult: function(aResultSet) {
-                    for (let row=aResultSet.getNextRow();
-                        row; row=aResultSet.getNextRow()) {
-                            let ele = langsMenu.appendItem(
-                                  strbundle.getFormattedString(
-                                    "lift-csubmenu-item-label", [
-                                        row.getResultByName("localization")
-                                      , row.getResultByName("code")
-                                  ])
-                                , row.getResultByName("code")
-                            );
-                            ele.setAttribute("oncommand",
-                                "Charlifter.Lifter.liftSelection('"
-                                    + row.getResultByName("code") + "')");
-                    }
-                },
-                handleError: function(aError) {
-                    prompts.alert(window
-                        , strbundle.getString("errors-context-menu-title")
-                        , strbundle.getString("errors-context-menu")
-                    );
-                },
-                handleCompletion: function(aCompletion) {},
             });
         },
         readyContextMenu : function(aE) {
