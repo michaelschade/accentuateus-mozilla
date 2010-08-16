@@ -101,7 +101,13 @@ Charlifter.Lifter = function() {
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu, false);
             this.getLangs(function(aSuccess) {
-                response = JSON.parse(aSuccess.target.responseText);
+                let response = {};
+                try {
+                    response = JSON.parse(aSuccess.target.responseText);
+                } catch(err) {
+                    prompts.alert(window, strbundle.getString("errors-title")
+                        , strbundle.getString("errors-unknown"));
+                }
                 switch(response.code) {
                     case codes.langListOutdated:
                         /* New list available. Clear old languages and insert new list to database. */
@@ -110,14 +116,20 @@ Charlifter.Lifter = function() {
                             langs[langPair] = [langs[langPair], "Spanish"]; // TODO: Get localized value
                         }
                         Charlifter.SQL.clearLangs({
+                            handleResult: function(aResultSet) {},
                             handleError: function(aError) {
-                                window.alert("Error with clearing languages.");
-                            }
+                                prompts.alert(window, strbundle.getString("errors-title")
+                                    , strbundle.getString("errors-unknown"));
+                            },
+                            handleCompletion: function(aCompletion) {},
                         });
                         Charlifter.SQL.newLangs(langs, {
+                            handleResult: function(aResultSet) {},
                             handleError: function(aError) {
-                                window.alert("Error with adding new languages.");
+                                prompts.alert(window, strbundle.getString("errors-title")
+                                    , strbundle.getString("errors-unknown"));
                             },
+                            handleCompletion: function(aCompletion) {},
                         });
                         break;
                     case codes.langListCurrent:
@@ -153,6 +165,7 @@ Charlifter.Lifter = function() {
                         , strbundle.getString("errors-context-menu")
                     );
                 },
+                handleCompletion: function(aCompletion) {},
             });
         },
         readyContextMenu : function(aE) {
@@ -222,6 +235,7 @@ Charlifter.Lifter = function() {
                     prompts.alert(window, strbundle.getString("errors-lang-localization-title")
                         , strbundle.getString("errors-lang-localization"));
                 },
+                handleCompletion: function(aCompletion) {},
             });
         },
         liftSelection : function(lang) {
@@ -229,13 +243,21 @@ Charlifter.Lifter = function() {
             let focused = document.commandDispatcher.focusedElement;
             focused.disabled = true;
             this.lift(lang, focused.value, function(aSuccess) {
-                let response = JSON.parse(aSuccess.target.responseText);
+                let response = {};
+                try {
+                    response = JSON.parse(aSuccess.target.responseText);
+                } catch(err) {
+                    prompts.alert(window, strbundle.getString("errors-title")
+                        , strbundle.getString("errors-unknown"));
+                }
                 switch (response.code) {
                     case codes.liftSuccess:
                         focused.value = response.text;
                         break;
                     case codes.liftFailUnknown:
-                        prompts.alert(window, strbundle.getString("errors-title"), response.text);
+                        prompts.alert(window
+                            , strbundle.getString("errors-title")
+                            , response.text);
                         break;
                     default:
                         break;
