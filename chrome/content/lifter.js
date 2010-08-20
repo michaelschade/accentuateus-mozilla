@@ -146,11 +146,9 @@ Charlifter.Lifter = function() {
                     case codes.langListOutdated:
                         /* New list available. Clear old languages
                             and insert new list to database. */
-                            // TODO: [["es", "Espanol"], ["fr", "Francois"]]
-                        let langs = response.text.split(',');
+                        let langs = response.text.split('\n');
                         for (let langPair in langs) {
-                            // TODO: Get localized value
-                            langs[langPair] = [langs[langPair], "Spanish"];
+                            langs[langPair] = langs[langPair].split(':');
                         }
                         Charlifter.SQL.clearLangs({
                             handleResult: function(aResultSet) {},
