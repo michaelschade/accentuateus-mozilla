@@ -125,12 +125,6 @@ Charlifter.Lifter = function() {
         init : function() {
             strbundle = document.getElementById("charlifter-string-bundle");
             /* Create dynamic menu of available languages */
-            /* TODO: REMOVE THIS PREFERENCE SETTING */
-            cprefs.setCharPref("selection-code", "es");
-            cprefs.setCharPref("selection-localized", "Spanish");
-            cprefs.setIntPref("version", 1);
-            cprefs.setCharPref("locale", "en-US");
-            /* TODO: REMOVE THIS PREFERENCE SETTING */
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
                 , false);

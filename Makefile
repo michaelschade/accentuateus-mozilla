@@ -79,7 +79,8 @@ install: $(build_dir) $(xpi_built)
 
 $(xpi_file): $(build_dir) $(xpi_built)
 	@echo "Creating XPI file."
-	@cd $(build_dir); $(ZIP) ../$(xpi_file) $(xpi_built_no_dir)
+	@cp -Rf chrome/defaults $(build_dir)
+	@cd $(build_dir); $(ZIP) -r ../$(xpi_file) $(xpi_built_no_dir) defaults
 	@echo "Creating XPI file. Done!"
 
 $(build_dir)/%: %
