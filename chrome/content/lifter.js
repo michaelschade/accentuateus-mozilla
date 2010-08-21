@@ -186,15 +186,26 @@ Charlifter.Lifter = function() {
             /* Hide context menu elements where appropriate */
             let liftItem = document.getElementById(
                 "charlifter-cmenu-item-lift");
-            liftItem.setAttribute("label", strbundle.getFormattedString(
-                "lift-citem-label", [
-                      cprefs.getCharPref("selection-localized")
-                    , cprefs.getCharPref("selection-code")
-                ]
-            ));
+            let lang = cprefs.getCharPref("selection-code");
+            Charlifter.SQL.getLangLocalization(lang, {
+                handleResult: function(aResult) {
+                    liftItem.setAttribute("label", strbundle.getFormattedString(
+                        "lift-citem-label", [
+                            aResult.getNextRow().getResultByName("localization")
+                            , lang
+                        ]
+                    ));
+                },
+                handleError: function(aError) {
+                    prompts.alert(window
+                        , strbundle.getString("errors-lang-localization-title")
+                        , strbundle.getString("errors-lang-localization"));
+                },
+                handleCompletion: function(aCompletion) {},
+            });
             liftItem.setAttribute("oncommand",
                 "Charlifter.Lifter.liftSelection('"
-                    + cprefs.getCharPref("selection-code") + "')");
+                    + lang + "')");
             let langsItem    = document.getElementById(
                 "charlifter-cmenu-languages-item");
             liftItem.hidden  = !(gContextMenu.onTextInput);
@@ -243,20 +254,7 @@ Charlifter.Lifter = function() {
                 );
             }
             /* Store last used language code and localization in preferences */
-            Charlifter.SQL.getLangLocalization(lang, {
-                handleResult: function(aResult) {
-                    cprefs.setCharPref("selection-localized"
-                        , aResult.getNextRow().getResultByName("localization")
-                    );
-                    cprefs.setCharPref("selection-code", lang);
-                },
-                handleError: function(aError) {
-                    prompts.alert(window
-                        , strbundle.getString("errors-lang-localization-title")
-                        , strbundle.getString("errors-lang-localization"));
-                },
-                handleCompletion: function(aCompletion) {},
-            });
+            cprefs.setCharPref("selection-code", lang);
         },
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
