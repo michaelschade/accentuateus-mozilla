@@ -263,7 +263,6 @@ Charlifter.Lifter = function() {
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
-            focused.disabled = true;
             this.lift(lang, focused.value, function(aSuccess) {
                 let response = {};
                 try {
@@ -284,9 +283,7 @@ Charlifter.Lifter = function() {
                     default:
                         break;
                 }
-                focused.disabled = false;
             }, function(aError) {
-                focused.disabled = false;
                 prompts.alert(window,
                       strbundle.getString("errors-lift-selection-title")
                     , strbundle.getString("errors-lift-selection"));
