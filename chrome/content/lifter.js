@@ -165,6 +165,7 @@ Charlifter.Lifter = function() {
                                 populateLangsMenu();
                             },
                         });
+                        cprefs.setIntPref("version", response.version);
                         break;
                     case codes.langListCurrent:
                         populateLangsMenu();
@@ -218,6 +219,9 @@ Charlifter.Lifter = function() {
             let version = 0; // Forces new list retrieval
             if (locale == cprefs.getCharPref("locale")) {
                 version = cprefs.getIntPref("version");
+            }
+            else { // Charlifter Locale Mismatch
+                cprefs.setCharPref("locale", locale);
             }
             request = genRequest({
                   call:     "charlifter.langs"
