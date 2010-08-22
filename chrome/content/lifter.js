@@ -4,6 +4,8 @@ if ("undefined" == typeof(Charlifter)) {
 
 Charlifter.SQL = function() {
     let db = null;
+    let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+        .getService(Ci.nsIPromptService);
     let connect = function() {
         /* Connects to sqlite file if not already done so */
         if (db === null) {
@@ -16,12 +18,20 @@ Charlifter.SQL = function() {
                                  + "/service;1"]
                                     .getService(Components.interfaces
                                         .mozIStorageService);
-            db = storageService.openDatabase(file);
+            try {
+                db = storageService.openDatabase(file);
+                db.executeSimpleSQL(
+                    "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5)"
+                        + ", localization VARCHAR(255))"
+                );
+            }
+            catch(err) {
+                prompts.alert(window
+                    , strbundle.getString("errors-context-menu-title")
+                    , strbundle.getString("errors-context-menu")
+                );
+            }
             // Initialize lang table if not in existence
-            db.executeSimpleSQL(
-                "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5)"
-                    + ", localization VARCHAR(255))"
-            );
         }
     };
     let query = function(query) {
