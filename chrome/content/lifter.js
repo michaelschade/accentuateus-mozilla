@@ -4,7 +4,7 @@ if ("undefined" == typeof(Charlifter)) {
 
 Charlifter.SQL = function() {
     let db = null;
-    let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+    let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
     let connect = function() {
         /* Connects to sqlite file if not already done so */
@@ -63,6 +63,11 @@ Charlifter.SQL = function() {
         getLangs : function(callbacks) {
             /* Return languages. */
             let statement = query("SELECT code, localization FROM langs");
+            statement.executeAsync(callbacks);
+        },
+        getNumLangs : function(callbacks) {
+            /* Return languages. */
+            let statement = query("SELECT count(*) FROM langs");
             statement.executeAsync(callbacks);
         },
         getLangLocalization : function(code, callbacks) {
@@ -139,6 +144,16 @@ Charlifter.Lifter = function() {
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
                 , false);
+            // If database empty, ensure version = 0
+            Charlifter.SQL.getNumLangs({
+                handleResult: function(aR) {
+                    if (aR.getNextRow().getResultByIndex(0) == 0) {
+                        cprefs.setIntPref("version", 0);
+                    }
+                },
+                handleError: function(aE) {},
+                handleCompletion: function(aC) {},
+            });
             this.populateLangTable();
         },
         populateLangTable : function() {
