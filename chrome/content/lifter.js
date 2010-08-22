@@ -72,6 +72,7 @@ Charlifter.Lifter = function() {
         , langListOutdated  : 100
         , langListCurrent   : 200
     };
+    let populatedLangTable = false;
     let prefs = Components.classes["@mozilla.org/preferences-service;1"]
         .getService(Components.interfaces.nsIPrefService);
     let cprefs = prefs.getBranch("charlifter.languages.");
@@ -128,6 +129,9 @@ Charlifter.Lifter = function() {
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
                 , false);
+            this.populateLangTable();
+        },
+        populateLangTable : function() {
             this.getLangs(function(aSuccess) {
                 let response = {};
                 try {
@@ -146,71 +150,73 @@ Charlifter.Lifter = function() {
                         }
                         Charlifter.SQL.clearLangs({
                             handleResult: function(aResultSet) {},
-                            handleError: function(aError) {
-                                prompts.alert(window
-                                    , strbundle.getString("errors-title")
-                                    , strbundle.getString("errors-unknown"));
-                            },
+                            handleError: function(aError) {},
                             handleCompletion: function(aCompletion) {},
                         });
                         Charlifter.SQL.newLangs(langs, {
                             handleResult: function(aResultSet) {},
                             handleError: function(aError) {
                                 populateLangsMenu();
-                                prompts.alert(window
-                                    , strbundle.getString("errors-title")
-                                    , strbundle.getString("errors-unknown"));
                             },
                             handleCompletion: function(aCompletion) {
                                 populateLangsMenu();
                             },
                         });
                         cprefs.setIntPref("version", response.version);
+                        populatedLangTable = true;
                         break;
                     case codes.langListCurrent:
                         populateLangsMenu();
+                        populatedLangTable = true;
                         break;
                     default:
                         populateLangsMenu();
-                        prompts.alert(window
-                            , strbundle.getString("errors-title")
-                            , strbundle.getString("errors-unknown"));
                         break;
                 }
             }, function(aError) {
                 populateLangsMenu();
-                prompts.alert(window, strbundle.getString("errors-title")
-                    , strbundle.getString("errors-unknown"));
             });
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
-            let liftItem = document.getElementById(
+            let liftItem    = document.getElementById(
                 "charlifter-cmenu-item-lift");
-            let lang = cprefs.getCharPref("selection-code");
-            Charlifter.SQL.getLangLocalization(lang, {
-                handleResult: function(aResult) {
-                    liftItem.setAttribute("label", strbundle.getFormattedString(
-                        "lift-citem-label", [
-                            aResult.getNextRow().getResultByName("localization")
-                            , lang
-                        ]
-                    ));
-                },
-                handleError: function(aError) {
-                    prompts.alert(window
-                        , strbundle.getString("errors-lang-localization-title")
-                        , strbundle.getString("errors-lang-localization"));
-                },
-                handleCompletion: function(aCompletion) {},
-            });
-            liftItem.setAttribute("oncommand",
-                "Charlifter.Lifter.liftSelection('"
-                    + lang + "')");
-            let langsItem    = document.getElementById(
+            let langsItem   = document.getElementById(
                 "charlifter-cmenu-languages-item");
-            liftItem.hidden  = !(gContextMenu.onTextInput);
-            langsItem.hidden = !(gContextMenu.onTextInput);
+            let lang        = cprefs.getCharPref("selection-code");
+            if (populatedLangTable == false) {
+                Charlifter.Lifter.populateLangTable();
+            }
+            if (langsItem.childNodes[0].childNodes.length != 0) {
+                Charlifter.SQL.getLangLocalization(lang, {
+                    handleResult: function(aResult) {
+                        liftItem.setAttribute("label"
+                            , strbundle.getFormattedString(
+                                "lift-citem-label", [
+                                      aResult.getNextRow().getResultByName(
+                                        "localization")
+                                    , lang
+                            ]
+                        ));
+                    },
+                    handleError: function(aError) {
+                        prompts.alert(window
+                            , strbundle.getString(
+                                "errors-lang-localization-title")
+                            , strbundle.getString("errors-lang-localization"));
+                    },
+                    handleCompletion: function(aCompletion) {},
+                });
+                liftItem.setAttribute("oncommand",
+                    "Charlifter.Lifter.liftSelection('"
+                        + lang + "')");
+                liftItem.hidden  = !(gContextMenu.onTextInput);
+                langsItem.hidden = !(gContextMenu.onTextInput);
+            }
+            else {
+                liftItem.hidden     = true;
+                langsItem.hidden    = true;
+            }
         },
         getLangs : function(success, error) {
             /* API Call: Get language list */
