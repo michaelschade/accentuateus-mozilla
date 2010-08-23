@@ -221,36 +221,40 @@ Charlifter.Lifter = function() {
             if (langsItem.childNodes[0].childNodes.length != 0) {
                 let lang    = cprefs.getCharPref("selection-code");
                 let focused = document.commandDispatcher.focusedElement;
-                if (pageElements[focused.getAttribute(cid)] != null) {
+                Charlifter.SQL.getLangLocalization(lang, {
+                    handleResult: function(aResult) {
+                        liftItem.setAttribute("label"
+                            , strbundle.getFormattedString(
+                                "lift-citem-label", [
+                                      aResult.getNextRow().getResultByName(
+                                        "localization")
+                                    , lang
+                            ]
+                        ));
+                    },
+                    handleError: function(aError) {
+                        prompts.alert(window
+                            , strbundle.getString(
+                                "errors-lang-localization-title")
+                            , strbundle.getString(
+                                "errors-lang-localization"));
+                    },
+                    handleCompletion: function(aCompletion) {},
+                });
+                liftItem.setAttribute("oncommand",
+                    "Charlifter.Lifter.liftSelection('"
+                        + lang + "')");
+                let request = null;
+                try {
+                    request = pageElements[focused.getAttribute(cid)];
+                } catch(err) {}
+                if (request != null) {
                     liftCancelItem.hidden   = false;
                     liftItem.hidden         = true;
                     langsItem.hidden        = true;
                 }
                 else {
                     liftCancelItem.hidden   = true;
-                    Charlifter.SQL.getLangLocalization(lang, {
-                        handleResult: function(aResult) {
-                            liftItem.setAttribute("label"
-                                , strbundle.getFormattedString(
-                                    "lift-citem-label", [
-                                          aResult.getNextRow().getResultByName(
-                                            "localization")
-                                        , lang
-                                ]
-                            ));
-                        },
-                        handleError: function(aError) {
-                            prompts.alert(window
-                                , strbundle.getString(
-                                    "errors-lang-localization-title")
-                                , strbundle.getString(
-                                    "errors-lang-localization"));
-                        },
-                        handleCompletion: function(aCompletion) {},
-                    });
-                    liftItem.setAttribute("oncommand",
-                        "Charlifter.Lifter.liftSelection('"
-                            + lang + "')");
                     liftItem.hidden  = !(gContextMenu.onTextInput);
                     langsItem.hidden = !(gContextMenu.onTextInput);
                 }

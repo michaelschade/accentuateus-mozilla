@@ -22,6 +22,7 @@
             label           = "&charlifter.citem.cancel.label;"
             accesskey       = "&charlifter.citem.cancel.accesskey;"
             oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
+            hidden          = "true"
         />
         <menuitem id        = "charlifter-cmenu-item-lift"
             accesskey       = "&charlifter.citem.lift.accesskey;"
