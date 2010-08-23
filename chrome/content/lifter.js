@@ -96,7 +96,7 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let genRequest  = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://ares:1932/";
+        let url = "http://165.134.12.12:1932/";
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -294,15 +294,12 @@ Charlifter.Lifter = function() {
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
-            let otext = focused.value;
             focused.readOnly = true;
-            focused.value = strbundle.getString("lift-in-progress");
-            this.lift(lang, otext, function(aSuccess) {
+            this.lift(lang, focused.value, function(aSuccess) {
                 let response = {};
                 try {
                     response = JSON.parse(aSuccess.target.responseText);
                 } catch(err) {
-                    focused.value = otext;
                     focused.readOnly = false;
                     prompts.alert(window, strbundle.getString("errors-title")
                         , strbundle.getString("errors-unknown"));
@@ -312,18 +309,15 @@ Charlifter.Lifter = function() {
                         focused.value = response.text;
                         break;
                     case codes.liftFailUnknown:
-                        focused.value = otext;
                         prompts.alert(window
                             , strbundle.getString("errors-title")
                             , response.text);
                         break;
                     default:
-                        focused.value = otext;
                         break;
                 }
                 focused.readOnly = false;
             }, function(aError) {
-                focused.value = otext;
                 focused.readOnly = false;
                 prompts.alert(window,
                       strbundle.getString("errors-lift-selection-title")
