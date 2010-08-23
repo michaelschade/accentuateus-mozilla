@@ -1,5 +1,7 @@
 <!-- Context menu entry to lift last used language -->
-<!ENTITY charlifter.citem.accesskey "L">
+<!ENTITY charlifter.citem.lift.accesskey    "L">
+<!ENTITY charlifter.citem.cancel.label      "Cancel Lift">
+<!ENTITY charlifter.citem.cancel.accesskey  "">
 
 <!-- Context menu's submenu containing all available languages -->
-<!ENTITY charlifter.csubmenu.label  "Lift Text For...">
+<!ENTITY charlifter.csubmenu.lift.label     "Lift Text For...">

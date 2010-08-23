@@ -96,7 +96,7 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let genRequest  = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://165.134.12.12:1932/";
+        let url = "http://ares:1932/";
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -137,6 +137,14 @@ Charlifter.Lifter = function() {
             handleCompletion: function(aCompletion) {},
         });
     };
+    let S4 = function() {
+       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    let uuid = function() {
+       return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+    }
+    let cid = "_-charlifter-id"; // Charlifter attribute name
+    let pageElements = {};
     return {
         init : function() {
             strbundle = document.getElementById("charlifter-string-bundle");
@@ -204,43 +212,53 @@ Charlifter.Lifter = function() {
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
+            let liftCancelItem = document.getElementById(
+                "charlifter-cmenu-item-lift-cancel");
             let liftItem    = document.getElementById(
                 "charlifter-cmenu-item-lift");
             let langsItem   = document.getElementById(
                 "charlifter-cmenu-languages-item");
-            let lang        = cprefs.getCharPref("selection-code");
-            if (populatedLangTable == false) {
-                Charlifter.Lifter.populateLangTable();
-            }
             if (langsItem.childNodes[0].childNodes.length != 0) {
-                Charlifter.SQL.getLangLocalization(lang, {
-                    handleResult: function(aResult) {
-                        liftItem.setAttribute("label"
-                            , strbundle.getFormattedString(
-                                "lift-citem-label", [
-                                      aResult.getNextRow().getResultByName(
-                                        "localization")
-                                    , lang
-                            ]
-                        ));
-                    },
-                    handleError: function(aError) {
-                        prompts.alert(window
-                            , strbundle.getString(
-                                "errors-lang-localization-title")
-                            , strbundle.getString("errors-lang-localization"));
-                    },
-                    handleCompletion: function(aCompletion) {},
-                });
-                liftItem.setAttribute("oncommand",
-                    "Charlifter.Lifter.liftSelection('"
-                        + lang + "')");
-                liftItem.hidden  = !(gContextMenu.onTextInput);
-                langsItem.hidden = !(gContextMenu.onTextInput);
+                let lang    = cprefs.getCharPref("selection-code");
+                let focused = document.commandDispatcher.focusedElement;
+                if (pageElements[focused.getAttribute(cid)] != null) {
+                    liftCancelItem.hidden   = false;
+                    liftItem.hidden         = true;
+                    langsItem.hidden        = true;
+                }
+                else {
+                    liftCancelItem.hidden   = true;
+                    Charlifter.SQL.getLangLocalization(lang, {
+                        handleResult: function(aResult) {
+                            liftItem.setAttribute("label"
+                                , strbundle.getFormattedString(
+                                    "lift-citem-label", [
+                                          aResult.getNextRow().getResultByName(
+                                            "localization")
+                                        , lang
+                                ]
+                            ));
+                        },
+                        handleError: function(aError) {
+                            prompts.alert(window
+                                , strbundle.getString(
+                                    "errors-lang-localization-title")
+                                , strbundle.getString(
+                                    "errors-lang-localization"));
+                        },
+                        handleCompletion: function(aCompletion) {},
+                    });
+                    liftItem.setAttribute("oncommand",
+                        "Charlifter.Lifter.liftSelection('"
+                            + lang + "')");
+                    liftItem.hidden  = !(gContextMenu.onTextInput);
+                    langsItem.hidden = !(gContextMenu.onTextInput);
+                }
             }
             else {
-                liftItem.hidden     = true;
-                langsItem.hidden    = true;
+                liftItem.hidden         = true;
+                langsItem.hidden        = true;
+                liftCancelItem.hidden   = true;
             }
         },
         getLangs : function(success, error) {
@@ -290,39 +308,58 @@ Charlifter.Lifter = function() {
             }
             /* Store last used language code and localization in preferences */
             cprefs.setCharPref("selection-code", lang);
+            return request;
+        },
+        cancelLift : function(cid) {
+            pageElements[cid].abort();
+            pageElements[cid] = null;
+        },
+        cancelLiftSelection : function() {
+            let focused = document.commandDispatcher.focusedElement;
+            try {
+                this.cancelLift(focused.getAttribute(cid));
+            } catch(err) {}
+            focused.readOnly = false;
         },
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
             focused.readOnly = true;
-            this.lift(lang, focused.value, function(aSuccess) {
-                let response = {};
-                try {
-                    response = JSON.parse(aSuccess.target.responseText);
-                } catch(err) {
-                    focused.readOnly = false;
-                    prompts.alert(window, strbundle.getString("errors-title")
-                        , strbundle.getString("errors-unknown"));
-                }
-                switch (response.code) {
-                    case codes.liftSuccess:
-                        focused.value = response.text;
-                        break;
-                    case codes.liftFailUnknown:
+            if (!focused.hasAttribute(cid)) {
+                focused.setAttribute(cid, uuid());
+            }
+            pageElements[focused.getAttribute(cid)]
+                = this.lift(lang, focused.value, function(aSuccess) {
+                    let response = {};
+                    try {
+                        response = JSON.parse(aSuccess.target.responseText);
+                    } catch(err) {
+                        focused.readOnly = false;
                         prompts.alert(window
                             , strbundle.getString("errors-title")
-                            , response.text);
-                        break;
-                    default:
-                        break;
-                }
-                focused.readOnly = false;
-            }, function(aError) {
-                focused.readOnly = false;
-                prompts.alert(window,
-                      strbundle.getString("errors-lift-selection-title")
-                    , strbundle.getString("errors-lift-selection"));
-            });
+                            , strbundle.getString("errors-unknown"));
+                    }
+                    switch (response.code) {
+                        case codes.liftSuccess:
+                            focused.value = response.text;
+                            break;
+                        case codes.liftFailUnknown:
+                            prompts.alert(window
+                                , strbundle.getString("errors-title")
+                                , response.text);
+                            break;
+                        default:
+                            break;
+                    }
+                    focused.readOnly = false;
+                    pageElements[focused.getAttribute(cid)] = null;
+                }, function(aError) {
+                    focused.readOnly = false;
+                    pageElements[focused.getAttribute(cid)] = null;
+                    prompts.alert(window,
+                          strbundle.getString("errors-lift-selection-title")
+                        , strbundle.getString("errors-lift-selection"));
+                });
         },
     }
 }();
