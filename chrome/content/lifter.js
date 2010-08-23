@@ -329,6 +329,8 @@ Charlifter.Lifter = function() {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
             focused.readOnly = true;
+            let ocursor = focused.style.cursor;
+            focused.style.cursor = "progress";
             if (!focused.hasAttribute(cid)) {
                 focused.setAttribute(cid, uuid());
             }
@@ -339,6 +341,7 @@ Charlifter.Lifter = function() {
                         response = JSON.parse(aSuccess.target.responseText);
                     } catch(err) {
                         focused.readOnly = false;
+                        focused.style.cursor = ocursor;
                         prompts.alert(window
                             , strbundle.getString("errors-title")
                             , strbundle.getString("errors-unknown"));
@@ -356,9 +359,11 @@ Charlifter.Lifter = function() {
                             break;
                     }
                     focused.readOnly = false;
+                    focused.style.cursor = ocursor;
                     pageElements[focused.getAttribute(cid)] = null;
                 }, function(aError) {
                     focused.readOnly = false;
+                    focused.style.cursor = ocursor;
                     pageElements[focused.getAttribute(cid)] = null;
                     prompts.alert(window,
                           strbundle.getString("errors-lift-selection-title")
