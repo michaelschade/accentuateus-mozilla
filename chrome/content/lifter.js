@@ -249,20 +249,20 @@ Charlifter.Lifter = function() {
                     request = pageElements[focused.getAttribute(cid)];
                 } catch(err) {}
                 if (request != null) {
-                    liftCancelItem.hidden   = false;
-                    liftItem.hidden         = true;
-                    langsItem.hidden        = true;
+                    liftCancelItem.disabled = false;
+                    liftItem.disabled       = true;
+                    langsItem.disabled      = true;
                 }
                 else {
-                    liftCancelItem.hidden   = true;
-                    liftItem.hidden  = !(gContextMenu.onTextInput);
-                    langsItem.hidden = !(gContextMenu.onTextInput);
+                    liftCancelItem.disabled = true;
+                    liftItem.disabled       = !(gContextMenu.onTextInput);
+                    langsItem.disabled      = !(gContextMenu.onTextInput);
                 }
             }
             else {
-                liftItem.hidden         = true;
-                langsItem.hidden        = true;
-                liftCancelItem.hidden   = true;
+                liftItem.disabled       = true;
+                langsItem.disabled      = true;
+                liftCancelItem.disabled = true;
             }
         },
         getLangs : function(success, error) {
