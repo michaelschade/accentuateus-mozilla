@@ -330,7 +330,7 @@ Charlifter.Lifter = function() {
             let focused = document.commandDispatcher.focusedElement;
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
-            focused.style.cursor = "progress";
+            focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
                 focused.setAttribute(cid, uuid());
             }
