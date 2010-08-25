@@ -18,12 +18,6 @@
     </stringbundleset>
 
     <menupopup id           = "contentAreaContextMenu">
-        <menuitem id        = "charlifter-cmenu-item-lift-cancel"
-            label           = "&charlifter.citem.cancel.label;"
-            accesskey       = "&charlifter.citem.cancel.accesskey;"
-            oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
-            disabled        = "true"
-        />
         <menuitem id        = "charlifter-cmenu-item-lift"
             accesskey       = "&charlifter.citem.lift.accesskey;"
         />
@@ -33,5 +27,11 @@
             <menupopup>
             </menupopup>
         </menu>
+        <menuitem id        = "charlifter-cmenu-item-lift-cancel"
+            label           = "&charlifter.citem.cancel.label;"
+            accesskey       = "&charlifter.citem.cancel.accesskey;"
+            oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
+            disabled        = "true"
+        />
     </menupopup>
 </overlay>
