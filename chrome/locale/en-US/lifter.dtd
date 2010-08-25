@@ -1,7 +1,9 @@
 <!-- Context menu entry to lift last used language -->
-<!ENTITY charlifter.citem.lift.accesskey    "L">
-<!ENTITY charlifter.citem.cancel.label      "Cancel Lift">
-<!ENTITY charlifter.citem.cancel.accesskey  "">
+<!ENTITY charlifter.citem.lift.accesskey        "L">
+<!ENTITY charlifter.citem.cancel.label          "Cancel Lift">
+<!ENTITY charlifter.citem.cancel.accesskey      "">
+<!ENTITY charlifter.citem.feedback.label        "Submit Text As Feedback">
+<!ENTITY charlifter.citem.feedback.accesskey    "F">
 
 <!-- Context menu's submenu containing all available languages -->
-<!ENTITY charlifter.csubmenu.lift.label     "Lift Text For...">
+<!ENTITY charlifter.csubmenu.lift.label         "Lift Text For...">

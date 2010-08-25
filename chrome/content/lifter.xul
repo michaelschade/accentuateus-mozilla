@@ -33,5 +33,11 @@
             oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
             disabled        = "true"
         />
+        <menuitem id        = "charlifter-cmenu-item-lift-feedback"
+            label           = "&charlifter.citem.feedback.label;"
+            accesskey       = "&charlifter.citem.feedback.accesskey;"
+            oncommand       = "Charlifter.Lifter.feedbackSelection();"
+            disabled        = "false"
+        />
     </menupopup>
 </overlay>

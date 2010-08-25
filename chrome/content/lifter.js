@@ -212,15 +212,34 @@ Charlifter.Lifter = function() {
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
-            let liftCancelItem = document.getElementById(
-                "charlifter-cmenu-item-lift-cancel");
             let liftItem    = document.getElementById(
                 "charlifter-cmenu-item-lift");
             let langsItem   = document.getElementById(
                 "charlifter-cmenu-languages-item");
+            let liftCancelItem = document.getElementById(
+                "charlifter-cmenu-item-lift-cancel");
+            let liftFeedbackItem = document.getElementById(
+                "charlifter-cmenu-item-lift-feedback");
+            let focused = document.commandDispatcher.focusedElement;
+            /*  Only display feedback item if
+                text is selected inside of text input */
+            if (gContextMenu.onTextInput) {
+                let selectedText = focused.value.substring(
+                      focused.selectionStart
+                    , focused.selectionEnd
+                );
+                if (selectedText != "") {
+                    liftFeedbackItem.disabled = false;
+                }
+                else {
+                    liftFeedbackItem.disabled = true;
+                }
+            }
+            else {
+                liftFeedbackItem.disabled = true;
+            }
             if (langsItem.childNodes[0].childNodes.length != 0) {
                 let lang    = cprefs.getCharPref("selection-code");
-                let focused = document.commandDispatcher.focusedElement;
                 Charlifter.SQL.getLangLocalization(lang, {
                     handleResult: function(aResult) {
                         liftItem.setAttribute("label"
@@ -260,9 +279,9 @@ Charlifter.Lifter = function() {
                 }
             }
             else {
-                liftItem.disabled       = true;
-                langsItem.disabled      = true;
-                liftCancelItem.disabled = true;
+                liftItem.disabled           = true;
+                langsItem.disabled          = true;
+                liftCancelItem.disabled     = true;
             }
         },
         getLangs : function(success, error) {
@@ -276,7 +295,7 @@ Charlifter.Lifter = function() {
             else { // Charlifter Locale Mismatch
                 cprefs.setCharPref("locale", locale);
             }
-            request = genRequest({
+            let request = genRequest({
                   call:     "charlifter.langs"
                 , version:  version
                 , locale:   locale
@@ -295,7 +314,7 @@ Charlifter.Lifter = function() {
             /* API Call: Lift text */
             let locale = prefs.getBranch("general.useragent.")
                 .getCharPref("locale");
-            request = genRequest({
+            let request = genRequest({
                   call:     "charlifter.lift"
                 , lang:     lang
                 , text:     text
@@ -370,9 +389,81 @@ Charlifter.Lifter = function() {
                         , strbundle.getString("errors-lift-selection"));
                 });
         },
+        feedback : function(text, success, error) {
+            let request = genRequest({
+                  call:     "charlifter.feedback"
+                , "lang":   cprefs.getCharPref("selection-code")
+                , "locale": cprefs.getCharPref("locale")
+                , "text":   text
+            }, success, error);
+            try {
+                request.send(request._call);
+            }
+            catch (err) {
+                prompts.alert(window
+                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-communication")
+                );
+            }
+        },
+        feedbackSelection : function() {
+            // No previous successful feedback submission
+            let result = 2;
+            if (!cprefs.getBoolPref("feedback-success")) {
+                result = prompts.confirmEx(
+                      window
+                    , strbundle.getString("feedback-confirm-title")
+                    , strbundle.getString("feedback-confirm")
+                    , (prompts.BUTTON_POS_0) * (prompts.BUTTON_TITLE_YES)
+                        + (prompts.BUTTON_POS_1) * (prompts.BUTTON_TITLE_NO)
+                        + (prompts.BUTTON_POS_2) * (prompts.BUTTON_TITLE_CANCEL)
+                    , ""
+                    , ""
+                    , ""
+                    , null
+                    , {}
+                );
+                switch(result) {
+                    case 0: // Yes
+                        cprefs.setBoolPref("feedback-success", true);
+                        prompts.alert(window
+                            , strbundle.getString("feedback-success-title")
+                            , strbundle.getString("feedback-success")
+                        );
+                        break;
+                    case 1: // No
+                        prompts.alert(window
+                            , strbundle.getString("feedback-fail-title")
+                            , strbundle.getString("feedback-fail")
+                        );
+                        break;
+                    case 2:
+                    default:
+                        break;
+                }
+            }
+            else { // They've done this before...
+                result = 0;
+            }
+            if (result == 0) {
+                let focused = document.commandDispatcher.focusedElement;
+                let selectedText = focused.value.substring(
+                      focused.selectionStart
+                    , focused.selectionEnd
+                );
+                // Fail silently
+                try {
+                this.feedback(selectedText, function(aSuccess) {
+                    }, function(aError) {
+                    }
+                );
+                } catch(e) { window.alert(e); }
+            }
+        },
     }
 }();
 
 window.addEventListener("load", function() {
         Charlifter.Lifter.init();
     }, false);
+
