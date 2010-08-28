@@ -27,8 +27,8 @@ Charlifter.SQL = function() {
             }
             catch(err) {
                 prompts.alert(window
-                    , strbundle.getString("errors-context-menu-title")
-                    , strbundle.getString("errors-context-menu")
+                    , strbundle.getString("errors-title")
+                    , strbundle.getString("errors-malfunction")
                 );
             }
             // Initialize lang table if not in existence
@@ -96,7 +96,7 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let genRequest  = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://ares:1932/";
+        let url = "http://ares:1932/"; // 165.134.12.12:1932
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -116,12 +116,10 @@ Charlifter.Lifter = function() {
                 for (let row=aResultSet.getNextRow();
                     row; row=aResultSet.getNextRow()) {
                         let ele = langsMenu.appendItem(
-                              strbundle.getFormattedString(
-                                "lift-csubmenu-item-label", [
-                                    row.getResultByName("localization")
-                                  , row.getResultByName("code")
-                              ])
-                            , row.getResultByName("code")
+                            ( row.getResultByName("code")
+                            + ": "
+                            + row.getResultByName("localization")
+                            ), row.getResultByName("code")
                         );
                         ele.setAttribute("oncommand",
                             "Charlifter.Lifter.liftSelection('"
@@ -130,8 +128,8 @@ Charlifter.Lifter = function() {
             },
             handleError: function(aError) {
                 prompts.alert(window
-                    , strbundle.getString("errors-context-menu-title")
-                    , strbundle.getString("errors-context-menu")
+                    , strbundle.getString("errors-title")
+                    , strbundle.getString("errors-communication")
                 );
             },
             handleCompletion: function(aCompletion) {},
@@ -148,6 +146,10 @@ Charlifter.Lifter = function() {
     return {
         init : function() {
             strbundle = document.getElementById("charlifter-string-bundle");
+            let liftItem = document.getElementById(
+                "charlifter-cmenu-item-lift");
+            liftItem.accesskey = strbundle.getString(
+                "lift-citem-label-accesskey");
             /* Create dynamic menu of available languages */
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
@@ -170,8 +172,9 @@ Charlifter.Lifter = function() {
                 try {
                     response = JSON.parse(aSuccess.target.responseText);
                 } catch(err) {
-                    prompts.alert(window, strbundle.getString("errors-title")
-                        , strbundle.getString("errors-unknown"));
+                    prompts.alert(window
+                        , strbundle.getString("errors-title")
+                        , strbundle.getString("errors-communication"));
                 }
                 switch(response.code) {
                     case codes.langListOutdated:
@@ -214,7 +217,7 @@ Charlifter.Lifter = function() {
             /* Hide context menu elements where appropriate */
             let liftItem    = document.getElementById(
                 "charlifter-cmenu-item-lift");
-            let langsItem   = document.getElementById(
+            let langsMenu   = document.getElementById(
                 "charlifter-cmenu-languages-item");
             let liftCancelItem = document.getElementById(
                 "charlifter-cmenu-item-lift-cancel");
@@ -238,16 +241,15 @@ Charlifter.Lifter = function() {
             else {
                 liftFeedbackItem.disabled = true;
             }
-            if (langsItem.childNodes[0].childNodes.length != 0) {
-                let lang    = cprefs.getCharPref("selection-code");
+            if (langsMenu.childNodes[0].childNodes.length != 0) {
+                let lang = cprefs.getCharPref("selection-code");
                 Charlifter.SQL.getLangLocalization(lang, {
                     handleResult: function(aResult) {
                         liftItem.setAttribute("label"
-                            , strbundle.getFormattedString(
-                                "lift-citem-label", [
-                                      aResult.getNextRow().getResultByName(
-                                        "localization")
-                                    , lang
+                            , strbundle.getFormattedString("lift-citem-label", [
+                                  aResult.getNextRow().getResultByName(
+                                    "localization")
+                                , lang
                             ]
                         ));
                     },
@@ -270,17 +272,17 @@ Charlifter.Lifter = function() {
                 if (request != null) {
                     liftCancelItem.disabled = false;
                     liftItem.disabled       = true;
-                    langsItem.disabled      = true;
+                    langsMenu.disabled      = true;
                 }
                 else {
                     liftCancelItem.disabled = true;
                     liftItem.disabled       = !(gContextMenu.onTextInput);
-                    langsItem.disabled      = !(gContextMenu.onTextInput);
+                    langsMenu.disabled      = !(gContextMenu.onTextInput);
                 }
             }
             else {
                 liftItem.disabled           = true;
-                langsItem.disabled          = true;
+                langsMenu.disabled          = true;
                 liftCancelItem.disabled     = true;
             }
         },
@@ -305,7 +307,7 @@ Charlifter.Lifter = function() {
             }
             catch (err) {
                 prompts.alert(window
-                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-title")
                     , strbundle.getString("errors-communication")
                 );
             }
@@ -325,7 +327,7 @@ Charlifter.Lifter = function() {
             }
             catch (err) {
                 prompts.alert(window
-                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-title")
                     , strbundle.getString("errors-communication")
                 );
             }
@@ -363,7 +365,7 @@ Charlifter.Lifter = function() {
                         focused.style.cursor = ocursor;
                         prompts.alert(window
                             , strbundle.getString("errors-title")
-                            , strbundle.getString("errors-unknown"));
+                            , strbundle.getString("errors-communication"));
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
@@ -385,8 +387,8 @@ Charlifter.Lifter = function() {
                     focused.style.cursor = ocursor;
                     pageElements[focused.getAttribute(cid)] = null;
                     prompts.alert(window,
-                          strbundle.getString("errors-lift-selection-title")
-                        , strbundle.getString("errors-lift-selection"));
+                          strbundle.getString("errors-title")
+                        , strbundle.getString("errors-communication"));
                 });
         },
         feedback : function(text, success, error) {
@@ -401,7 +403,7 @@ Charlifter.Lifter = function() {
             }
             catch (err) {
                 prompts.alert(window
-                    , strbundle.getString("errors-communication-title")
+                    , strbundle.getString("errors-title")
                     , strbundle.getString("errors-communication")
                 );
             }
@@ -433,7 +435,7 @@ Charlifter.Lifter = function() {
                         break;
                     case 1: // No
                         prompts.alert(window
-                            , strbundle.getString("feedback-fail-title")
+                            , strbundle.getString("feedback-confirm-title")
                             , strbundle.getString("feedback-fail")
                         );
                         break;
