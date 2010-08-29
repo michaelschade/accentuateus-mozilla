@@ -1,4 +1,4 @@
-content   charlifter              jar:chrome/charlifter.jar!/content/
-locale    charlifter  en-US       jar:chrome/charlifter.jar!/locale/en-US/
+content   accentuateus              jar:chrome/accentuateus.jar!/content/
+locale    accentuateus  en-US       jar:chrome/accentuateus.jar!/locale/en-US/
 
-overlay chrome://browser/content/browser.xul chrome://charlifter/content/lifter.xul
+overlay chrome://browser/content/browser.xul chrome://accentuateus/content/lifter.xul

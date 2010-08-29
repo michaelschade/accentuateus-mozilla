@@ -21,17 +21,17 @@
 
 <?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
 
-<!DOCTYPE overlay SYSTEM "chrome://charlifter/locale/lifter.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://accentuateus/locale/lifter.dtd">
 
 <overlay id     = "charlifter-browser-overlay"
         xmlns   = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type    = "application/x-javascript"
-        src         = "chrome://charlifter/content/lifter.js" />
+        src         = "chrome://accentuateus/content/lifter.js" />
 
     <stringbundleset id     = "stringbundleset">
         <stringbundle id    = "charlifter-string-bundle"
-            src             = "chrome://charlifter/locale/lifter.properties" />
+            src             = "chrome://accentuateus/locale/lifter.properties" />
     </stringbundleset>
 
     <menupopup id           = "contentAreaContextMenu">

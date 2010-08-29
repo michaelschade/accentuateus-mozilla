@@ -32,7 +32,7 @@ Charlifter.SQL = function() {
                         + "directory_service;1"]
                          .getService(Components.interfaces.nsIProperties)
                          .get("ProfD", Components.interfaces.nsIFile);
-            file.append("charlifter.sqlite");
+            file.append("accentuateus.sqlite");
             let storageService = Components.classes["@mozilla.org/storage"
                                  + "/service;1"]
                                     .getService(Components.interfaces
@@ -115,16 +115,23 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let callAPI     = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://ares:1932/"; // 165.134.12.12:1932
+        let url = "http://165.134.12.12:1932/";
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
+        request.open("POST", url, true);
         request.onload  = success;
         request.onerror = error;
-        request.open("POST", url, true);
-        request.setRequestHeader("Content-ype", "application/json");
+        let gExtensionManager = Components.classes[
+            "@mozilla.org/extensions/manager;1"]
+                .getService(Components.interfaces.nsIExtensionManager);
+        let version = gExtensionManager.getItemForID(
+            "addons-mozilla@accentuate.us").version;
+        request.setRequestHeader("User-Agent", "Accentuate.us/" + version
+            + ' ' + prefs.getBranch("general.useragent.extra.")
+                .getCharPref("firefox"));
+        request.setRequestHeader("Content-Type", "application/json");
         request.setRequestHeader("charset", "UTF-8");
-        request._call = JSON.stringify(args);
-        return request;
+        request.send(JSON.stringify(args));
     };
     let populateLangsMenu = function() {
         /* Populate language list menu. */
