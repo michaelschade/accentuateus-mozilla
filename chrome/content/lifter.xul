@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <!--
     Copyright 2010 Spearhead Development, L.L.C. <http://www.sddomain.com/>
     
@@ -17,11 +19,7 @@
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<?xml version="1.0"?>
-
 <?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
-<?xml-stylesheet type="text/css"
-  href="chrome://charlifter/skin/lifter.css" ?>
 
 <!DOCTYPE overlay SYSTEM "chrome://charlifter/locale/lifter.dtd">
 

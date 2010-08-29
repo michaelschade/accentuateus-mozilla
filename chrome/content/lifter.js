@@ -113,14 +113,14 @@ Charlifter.Lifter = function() {
     let strbundle   = null;
     let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
-    let genRequest  = function(args, success, error) {
+    let callAPI     = function(args, success, error) {
         /* Abstracts API calling code */
         let url = "http://ares:1932/"; // 165.134.12.12:1932
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
-        request.open("POST", url, true);
         request.onload  = success;
         request.onerror = error;
+        request.open("POST", url, true);
         request.setRequestHeader("Content-ype", "application/json");
         request.setRequestHeader("charset", "UTF-8");
         request._call = JSON.stringify(args);
@@ -316,40 +316,22 @@ Charlifter.Lifter = function() {
             else { // Charlifter Locale Mismatch
                 cprefs.setCharPref("locale", locale);
             }
-            let request = genRequest({
+            callAPI({
                   call:     "charlifter.langs"
                 , version:  version
                 , locale:   locale
             }, success, error);
-            try {
-                request.send(request._call);
-            }
-            catch (err) {
-                prompts.alert(window
-                    , strbundle.getString("errors-title")
-                    , strbundle.getString("errors-communication")
-                );
-            }
         },
         lift : function(lang, text, success, error) {
             /* API Call: Lift text */
             let locale = prefs.getBranch("general.useragent.")
                 .getCharPref("locale");
-            let request = genRequest({
+            callAPI({
                   call:     "charlifter.lift"
                 , lang:     lang
                 , text:     text
                 , locale:   locale
             }, success, error);
-            try {
-                request.send(request._call);
-            }
-            catch (err) {
-                prompts.alert(window
-                    , strbundle.getString("errors-title")
-                    , strbundle.getString("errors-communication")
-                );
-            }
             /* Store last used language code and localization in preferences */
             cprefs.setCharPref("selection-code", lang);
             return request;
@@ -411,21 +393,12 @@ Charlifter.Lifter = function() {
                 });
         },
         feedback : function(text, success, error) {
-            let request = genRequest({
+            callAPI({
                   call:     "charlifter.feedback"
                 , "lang":   cprefs.getCharPref("selection-code")
                 , "locale": cprefs.getCharPref("locale")
                 , "text":   text
             }, success, error);
-            try {
-                request.send(request._call);
-            }
-            catch (err) {
-                prompts.alert(window
-                    , strbundle.getString("errors-title")
-                    , strbundle.getString("errors-communication")
-                );
-            }
         },
         feedbackSelection : function() {
             // No previous successful feedback submission
