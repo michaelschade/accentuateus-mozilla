@@ -7,7 +7,7 @@
     <em:id>addons-mozilla@accentuate.us</em:id>
     <em:name>Accentuate.us</em:name>
     <em:description>An automatic text lifting program.</em:description>
-    <em:version>0.9b1</em:version>
+    <em:version>0.9b1-2010-08-31-1</em:version>
     <em:creator>Spearhead Development, L.L.C. (http://www.sddomain.com/)</em:creator>
     <em:homepageURL>http://www.accentuate.us/</em:homepageURL>
     <em:type>2</em:type>
@@ -17,7 +17,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.5</em:minVersion>
-        <em:maxVersion>3.6.*</em:maxVersion>
+        <em:maxVersion>4.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>
