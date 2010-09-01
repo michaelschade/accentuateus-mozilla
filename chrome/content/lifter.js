@@ -310,7 +310,9 @@ Charlifter.Lifter = function() {
                 liftItem.disabled           = true;
                 langsMenu.disabled          = true;
                 liftCancelItem.disabled     = true;
+                Charlifter.Lifter.populateLangTable();
             }
+            liftItem.hidden = (liftItem.label == '') ? true : false;
         },
         getLangs : function(success, error) {
             /* API Call: Get language list */

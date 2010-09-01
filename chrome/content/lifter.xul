@@ -34,7 +34,9 @@
             src             = "chrome://accentuateus/locale/lifter.properties" />
     </stringbundleset>
 
-    <menupopup id           = "contentAreaContextMenu">
+    <menupopup id           = "contentAreaContextMenu"
+        >
+        <menuseparator />
         <menuitem id        = "charlifter-cmenu-item-lift"
         />
         <menu id            = "charlifter-cmenu-languages-item"
