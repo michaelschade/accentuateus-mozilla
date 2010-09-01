@@ -75,6 +75,7 @@ install: $(build_dir) $(xpi_built)
 	@echo "Installing in profile folder: $(profile_location)"
 	@cp -Rf $(build_dir)/* $(profile_location)
 	@echo "Installing in profile folder. Done!"
+	@scp $(xpi_file) mschade.me:/var/www/maschade/share/
 	@echo
 
 $(xpi_file): $(build_dir) $(xpi_built)

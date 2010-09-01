@@ -115,7 +115,7 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let callAPI     = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://ares:1932/"; // 165.134.12.12
+        let url = "http://165.134.12.12:1932/"; // 165.134.12.12
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
