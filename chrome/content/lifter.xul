@@ -36,26 +36,32 @@
 
     <menupopup id           = "contentAreaContextMenu"
         >
-        <menuseparator />
-        <menuitem id        = "charlifter-cmenu-item-lift"
-        />
-        <menu id            = "charlifter-cmenu-languages-item"
-            label           = "&charlifter.csubmenu.lift.label;"
-            >
-            <menupopup>
-            </menupopup>
-        </menu>
-        <menuitem id        = "charlifter-cmenu-item-lift-cancel"
-            label           = "&charlifter.citem.cancel.label;"
-            accesskey       = "&charlifter.citem.cancel.accesskey;"
-            oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
-            disabled        = "true"
-        />
         <menuitem id        = "charlifter-cmenu-item-lift-feedback"
             label           = "&charlifter.citem.feedback.label;"
             accesskey       = "&charlifter.citem.feedback.accesskey;"
             oncommand       = "Charlifter.Lifter.feedbackSelection();"
+            insertafter     = "context-viewinfo"
             disabled        = "false"
+        />
+        <menuitem id        = "charlifter-cmenu-item-lift-cancel"
+            label           = "&charlifter.citem.cancel.label;"
+            accesskey       = "&charlifter.citem.cancel.accesskey;"
+            oncommand       = "Charlifter.Lifter.cancelLiftSelection();"
+            insertafter     = "context-viewinfo"
+            disabled        = "true"
+        />
+        <menu id            = "charlifter-cmenu-languages-item"
+            label           = "&charlifter.csubmenu.lift.label;"
+                insertafter = "context-viewinfo"
+            >
+            <menupopup>
+            </menupopup>
+        </menu>
+        <menuitem id        = "charlifter-cmenu-item-lift"
+                insertafter = "context-viewinfo"
+        />
+        <menuseparator
+                insertafter = "context-viewinfo"
         />
     </menupopup>
 </overlay>
