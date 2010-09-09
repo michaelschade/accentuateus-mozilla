@@ -113,7 +113,7 @@ Charlifter.Lifter = function() {
     let strbundle   = null;
     let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
-    let callAPI     = function(args, success, error) {
+    let genRequest     = function(args, success, error, abort) {
         /* Abstracts API calling code */
         let BASE_URL = "api.accentuate.us:8080/";
         let url = "http://";
@@ -129,6 +129,7 @@ Charlifter.Lifter = function() {
         request.open("POST", url, true);
         request.onload  = success;
         request.onerror = error;
+        request.onabort = abort;
         let gExtensionManager = Components.classes[
             "@mozilla.org/extensions/manager;1"]
                 .getService(Components.interfaces.nsIExtensionManager);
@@ -140,6 +141,7 @@ Charlifter.Lifter = function() {
         request.setRequestHeader("Content-Type", "application/json");
         request.setRequestHeader("charset", "UTF-8");
         request.send(JSON.stringify(args));
+        return request;
     };
     let populateLangsMenu = function() {
         /* Populate language list menu. */
@@ -245,7 +247,7 @@ Charlifter.Lifter = function() {
                 }
             }, function(aError) {
                 populateLangsMenu();
-            });
+            }, function(aA) {});
         },
         readyContextMenu : function(aE) {
             /* Hide context menu elements where appropriate */
@@ -265,12 +267,8 @@ Charlifter.Lifter = function() {
                       focused.selectionStart
                     , focused.selectionEnd
                 );
-                if (selectedText != "") {
-                    liftFeedbackItem.disabled = false;
-                }
-                else {
-                    liftFeedbackItem.disabled = true;
-                }
+                if (selectedText != "") { liftFeedbackItem.disabled = false; }
+                else { liftFeedbackItem.disabled = true; }
             }
             else {
                 liftFeedbackItem.disabled = true;
@@ -322,7 +320,7 @@ Charlifter.Lifter = function() {
             }
             liftItem.hidden = (liftItem.label == '') ? true : false;
         },
-        getLangs : function(success, error) {
+        getLangs : function(success, error, abort) {
             /* API Call: Get language list */
             let locale  = prefs.getBranch("general.useragent.")
                 .getCharPref("locale");
@@ -333,22 +331,23 @@ Charlifter.Lifter = function() {
             else { // Charlifter Locale Mismatch
                 cprefs.setCharPref("locale", locale);
             }
-            callAPI({
+            let request = genRequest({
                   call:     "charlifter.langs"
                 , version:  version
                 , locale:   locale
-            }, success, error);
+            }, success, error, abort);
+            return request;
         },
-        lift : function(lang, text, success, error) {
+        lift : function(lang, text, success, error, abort) {
             /* API Call: Lift text */
             let locale = prefs.getBranch("general.useragent.")
                 .getCharPref("locale");
-            callAPI({
+            let request = genRequest({
                   call:     "charlifter.lift"
                 , lang:     lang
                 , text:     text
                 , locale:   locale
-            }, success, error);
+            }, success, error, abort);
             /* Store last used language code and localization in preferences */
             cprefs.setCharPref("selection-code", lang);
             return request;
@@ -407,15 +406,18 @@ Charlifter.Lifter = function() {
                     prompts.alert(window,
                           strbundle.getString("errors-title")
                         , strbundle.getString("errors-communication"));
+                }, function(aAbort) {
+                    focused.style.cursor = ocursor;
                 });
         },
-        feedback : function(text, success, error) {
-            callAPI({
+        feedback : function(text, success, error, abort) {
+            let request = genRequest({
                   call:     "charlifter.feedback"
                 , "lang":   cprefs.getCharPref("selection-code")
                 , "locale": cprefs.getCharPref("locale")
                 , "text":   text
-            }, success, error);
+            }, success, error, abort);
+            return request;
         },
         feedbackSelection : function() {
             // No previous successful feedback submission
@@ -453,9 +455,8 @@ Charlifter.Lifter = function() {
                         break;
                 }
             }
-            else { // They've done this before...
-                result = 0;
-            }
+            // They've done this before...
+            else { result = 0; }
             if (result == 0) {
                 let focused = document.commandDispatcher.focusedElement;
                 let selectedText = focused.value.substring(
@@ -465,10 +466,9 @@ Charlifter.Lifter = function() {
                 // Fail silently
                 try {
                 this.feedback(selectedText, function(aSuccess) {
-                    }, function(aError) {
-                    }
+                    }, function(aError) {}, function(aAbort) {}
                 );
-                } catch(e) { window.alert(e); }
+                } catch(e) {}
             }
         },
     }
@@ -477,4 +477,3 @@ Charlifter.Lifter = function() {
 window.addEventListener("load", function() {
         Charlifter.Lifter.init();
     }, false);
-
