@@ -115,7 +115,10 @@ Charlifter.Lifter = function() {
         .getService(Ci.nsIPromptService);
     let callAPI     = function(args, success, error) {
         /* Abstracts API calling code */
-        let url = "http://ares:1932/";
+        let BASE_URL = "api.accentuate.us:8080/";
+        let url = "http://";
+        if ("undefined" == typeof(args['lang'])) { url += BASE_URL; }
+        else { url += args['lang'] + '.' + BASE_URL; }
         try {
             let durl = prefs.getBranch("charlifter.debug.")
                 .getCharPref("hostname");
