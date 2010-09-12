@@ -183,6 +183,33 @@ Charlifter.Lifter = function() {
     }
     let cid = "_-charlifter-id"; // Charlifter attribute name
     let pageElements = {};
+    let setLastLang = function() {
+        let liftItem    = document.getElementById(
+            "charlifter-cmenu-item-lift");
+        let lang = cprefs.getCharPref("selection-code");
+        Charlifter.SQL.getLangLocalization(lang, {
+            handleResult: function(aResult) {
+                liftItem.setAttribute("label"
+                    , strbundle.getFormattedString("lift-citem-label", [
+                          aResult.getNextRow().getResultByName(
+                            "localization")
+                        , lang
+                    ]
+                ));
+            },
+            handleError: function(aError) {
+                prompts.alert(window
+                    , strbundle.getString(
+                        "errors-lang-localization-title")
+                    , strbundle.getString(
+                        "errors-lang-localization"));
+            },
+            handleCompletion: function(aCompletion) {},
+        });
+        liftItem.setAttribute("oncommand",
+            "Charlifter.Lifter.liftSelection('"
+                + lang + "')");
+    };
     return {
         init : function() {
             strbundle = document.getElementById("charlifter-string-bundle");
@@ -206,6 +233,7 @@ Charlifter.Lifter = function() {
             });
             populateLangsMenu();
             this.populateLangTable();
+            setLastLang();
         },
         populateLangTable : function() {
             this.getLangs(function(aSuccess) {
@@ -279,33 +307,12 @@ Charlifter.Lifter = function() {
                 liftFeedbackItem.disabled = true;
             }
             if (langsMenu.childNodes[0].childNodes.length != 0) {
-                let lang = cprefs.getCharPref("selection-code");
-                Charlifter.SQL.getLangLocalization(lang, {
-                    handleResult: function(aResult) {
-                        liftItem.setAttribute("label"
-                            , strbundle.getFormattedString("lift-citem-label", [
-                                  aResult.getNextRow().getResultByName(
-                                    "localization")
-                                , lang
-                            ]
-                        ));
-                    },
-                    handleError: function(aError) {
-                        prompts.alert(window
-                            , strbundle.getString(
-                                "errors-lang-localization-title")
-                            , strbundle.getString(
-                                "errors-lang-localization"));
-                    },
-                    handleCompletion: function(aCompletion) {},
-                });
-                liftItem.setAttribute("oncommand",
-                    "Charlifter.Lifter.liftSelection('"
-                        + lang + "')");
+                setLastLang();
                 let request = null;
                 try {
                     request = pageElements[focused.getAttribute(cid)];
                 } catch(err) {}
+                // Check if something is being lifted
                 if (request != null) {
                     liftCancelItem.disabled = false;
                     liftItem.disabled       = true;
@@ -317,6 +324,7 @@ Charlifter.Lifter = function() {
                     langsMenu.disabled      = !(gContextMenu.onTextInput);
                 }
             }
+            // No languages in menu, populate
             else {
                 liftItem.disabled           = true;
                 langsMenu.disabled          = true;
