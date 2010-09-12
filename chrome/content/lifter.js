@@ -149,6 +149,10 @@ Charlifter.Lifter = function() {
             "charlifter-cmenu-languages-item");
         Charlifter.SQL.getLangs({
             handleResult: function(aResultSet) {
+                let menupopup = langsMenu.firstChild;
+                while (menupopup.hasChildNodes()) {
+                    menupopup.removeItemAt(0);
+                }
                 for (let row=aResultSet.getNextRow();
                     row; row=aResultSet.getNextRow()) {
                         let ele = langsMenu.appendItem(
@@ -200,6 +204,7 @@ Charlifter.Lifter = function() {
                 handleError: function(aE) {},
                 handleCompletion: function(aC) {},
             });
+            populateLangsMenu();
             this.populateLangTable();
         },
         populateLangTable : function() {
