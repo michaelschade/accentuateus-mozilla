@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright 2010 Spearhead Development, L.L.C. <http://www.sddomain.com/>
+    
+    This file is part of Accentuate.us.
+    
+    Accentuate.us is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Accentuate.us is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+    
+    You should have received a copy of the GNU General Public License
+    along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet href="chrome://accentuateus/content/about.css"?>
+
+<!DOCTYPE overlay SYSTEM "chrome://accentuateus/locale/lifter.dtd">
+
+<dialog xmlns       = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html  = "http://www.w3.org/1999/xhtml"
+        id          = "charlifter-about-dialog"
+        title       = "&charlifter.about.menu.label;"
+        buttons     = "accept"
+        >
+
+        <script type    = "application/x-javascript"
+            src         = "chrome://accentuateus/content/about.js" />
+
+        <stringbundleset id     = "stringbundleset">
+            <stringbundle id    = "charlifter-string-bundle"
+                src             = "chrome://accentuateus/locale/lifter.properties" />
+        </stringbundleset>
+
+        <description id="about-description">
+            <html:p id="accentuateus" />
+            <html:p id="privacy" />
+            <html:p id="copyright" />
+            <html:p id="contribute" />
+        </description>
+</dialog>

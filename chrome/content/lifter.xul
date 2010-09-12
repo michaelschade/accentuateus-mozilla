@@ -64,4 +64,10 @@
                 insertafter = "context-viewinfo"
         />
     </menupopup>
+    <menupopup id = "menu_HelpPopup">
+        <menuitem id        = "charlifter-cmenu-item-about"
+                label       = "&charlifter.about.menu.label;"
+                oncommand   = 'window.openDialog("chrome://accentuateus/content/about.xul").focus();'
+        />
+    </menupopup>
 </overlay>
