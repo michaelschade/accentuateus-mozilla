@@ -16,7 +16,6 @@
     You should have received a copy of the GNU General Public License
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 */
-
 if ("undefined" == typeof(Charlifter)) {
     var Charlifter = {};
 };
@@ -113,6 +112,7 @@ Charlifter.Lifter = function() {
     let strbundle   = null;
     let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
+    let version = 'err';
     let genRequest     = function(args, success, error, abort) {
         /* Abstracts API calling code */
         let BASE_URL = "api.accentuate.us:8080/";
@@ -130,14 +130,8 @@ Charlifter.Lifter = function() {
         request.onload  = success;
         request.onerror = error;
         request.onabort = abort;
-        let gExtensionManager = Components.classes[
-            "@mozilla.org/extensions/manager;1"]
-                .getService(Components.interfaces.nsIExtensionManager);
-        let version = gExtensionManager.getItemForID(
-            "addons-mozilla@accentuate.us").version;
         request.setRequestHeader("User-Agent", "Accentuate.us/" + version
-            + ' ' + prefs.getBranch("general.useragent.extra.")
-                .getCharPref("firefox"));
+            + ' ' + window.navigator.userAgent);
         request.setRequestHeader("Content-Type", "application/json");
         request.setRequestHeader("charset", "UTF-8");
         request.send(JSON.stringify(args));
@@ -211,7 +205,8 @@ Charlifter.Lifter = function() {
                 + lang + "')");
     };
     return {
-        init : function() {
+        init : function(ver) {
+            version = ver;
             strbundle = document.getElementById("charlifter-string-bundle");
             let liftItem = document.getElementById(
                 "charlifter-cmenu-item-lift");
@@ -488,5 +483,18 @@ Charlifter.Lifter = function() {
 }();
 
 window.addEventListener("load", function() {
-        Charlifter.Lifter.init();
-    }, false);
+    // Have to get version now due to new asynchronous style
+    try { // Old addon manager
+        let gExtensionManager = Components.classes[
+            "@mozilla.org/extensions/manager;1"]
+                .getService(Components.interfaces.nsIExtensionManager);
+        let version = gExtensionManager.getItemForID(
+            "addons-mozilla@accentuate.us").version;
+        Charlifter.Lifter.init(version);
+    } catch(err) { // New addon manager
+        Components.utils.import("resource://gre/modules/AddonManager.jsm");
+            AddonManager.getAddonByID("addons-mozilla@accentuate.us",
+                function(addon) { Charlifter.Lifter.init(addon.version); }
+            );
+    }
+}, false);
