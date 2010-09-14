@@ -41,8 +41,9 @@
 
         <description id="about-description">
             <html:p id="accentuateus" />
-            <html:p id="privacy" />
-            <html:p id="copyright" />
-            <html:p id="contribute" />
+            <html:p class="extra" id="privacy" />
+            <html:p class="extra" id="contribute" />
+            <html:p class="extra" id="license" />
+            <html:p class="extra" id="copyright" />
         </description>
 </dialog>

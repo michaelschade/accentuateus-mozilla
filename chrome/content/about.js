@@ -22,26 +22,34 @@ if ("undefined" == typeof(Charlifter)) {
 };
 
 Charlifter.About = function() {
-    let link = function(link) {
-        /* Returns HTML element string to open link in dialog. */
-        return '<html:a href="#" onclick="window.open(\'' + link + '\');">';
+    let link = function(link, text) {
+        /* Returns HTML element string to open link in dialog.
+        Text is optional. */
+        if (typeof(text) == 'undefined') { text = link; }
+        return '<html:a href="#" onclick="window.open(\'' + link + '\');">'
+            + text + '</html:a>';
     };
-    let content = function(section, links) {
-        /* Sets the about dialog's content based on section and links. */
+    let content = function(section, vars, appendText) {
+        /* Sets the about dialog's content based on section and links.
+        Vars may be a list or a string. appendText is optional. */
+        if (typeof(vars) == 'string') { vars = [vars]; }
         let strbundle = document.getElementById("charlifter-string-bundle");
-        let text = strbundle.getFormattedString("about-" + section, links);
+        // vars may be empty but this is okay for our limited use
+        let text = strbundle.getFormattedString("about-" + section, vars);
+        if (typeof(appendText) != 'undefined') { text += ' ' + appendText; }
         document.getElementById(section).innerHTML = text;
     };
     return {
         init : function() {
             let description = document.getElementById("about-description");
             let site = "http://www.accentuate.us/";
-            content('accentuateus', [link(site)]);
-            content('privacy', [link(site + 'privacy')]);
-            content('copyright', [link('http://www.sddomain.com/')
-                , link('http://www.gnu.org/licenses/gpl.html')
-            ]);
-            content('contribute', [link(site + 'contribute')]);
+            content('accentuateus', link(site, 'Accentuate.us'));
+            content('privacy', [], link(site + 'privacy'));
+            content('copyright', link('http://www.sddomain.com/'
+                , 'Spearhead Development L.L.C.'));
+            content('license', link('http://www.gnu.org/licenses/gpl.html'
+                , 'GPLv3'));
+            content('contribute', [], link(site + 'contribute'));
         },
     }
 }();
