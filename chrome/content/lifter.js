@@ -330,8 +330,7 @@ Charlifter.Lifter = function() {
         },
         getLangs : function(success, error, abort) {
             /* API Call: Get language list */
-            let locale  = prefs.getBranch("general.useragent.")
-                .getCharPref("locale");
+            let locale = window.navigator.language;
             let version = 0; // Forces new list retrieval
             if (locale == cprefs.getCharPref("locale")) {
                 version = cprefs.getIntPref("version");
@@ -348,8 +347,7 @@ Charlifter.Lifter = function() {
         },
         lift : function(lang, text, success, error, abort) {
             /* API Call: Lift text */
-            let locale = prefs.getBranch("general.useragent.")
-                .getCharPref("locale");
+            let locale = window.navigator.language;
             let request = genRequest({
                   call:     "charlifter.lift"
                 , lang:     lang
