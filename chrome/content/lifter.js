@@ -372,14 +372,25 @@ Charlifter.Lifter = function() {
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
+            let ihtml = false;
+            if(!focused) { // Get from an iframe
+                focused = document.commandDispatcher
+                    .focusedWindow.document.activeElement;
+                ihtml = true;
+            }
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
+            let value = focused.value;
+            if (typeof(value) == 'undefined') {
+                ihtml = true;
+                value = focused.innerHTML;
+            }
             focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
                 focused.setAttribute(cid, uuid());
             }
             pageElements[focused.getAttribute(cid)]
-                = this.lift(lang, focused.value, function(aSuccess) {
+                = this.lift(lang, value, function(aSuccess) {
                     let response = {};
                     try {
                         response = JSON.parse(aSuccess.target.responseText);
@@ -392,7 +403,8 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
-                            focused.value = response.text;
+                            if (ihtml) { focused.innerHTML = response.text; }
+                            else { focused.value = response.text; }
                             break;
                         case codes.liftFailUnknown:
                             prompts.alert(window
