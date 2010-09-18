@@ -42,14 +42,14 @@ Charlifter.About = function() {
     return {
         init : function() {
             let description = document.getElementById("about-description");
-            let site = "http://www.accentuate.us/";
+            let site = "http://accentuate.us/";
             content('accentuateus', link(site, 'Accentuate.us'));
             content('privacy', [], link(site + 'privacy'));
             content('copyright', link('http://www.sddomain.com/'
                 , 'Spearhead Development L.L.C.'));
             content('license', link('http://www.gnu.org/licenses/gpl.html'
                 , 'GPLv3'));
-            content('contribute', [], link(site + 'contribute'));
+            content('contribute', [], link(site + 'contributing'));
         },
     }
 }();
