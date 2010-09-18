@@ -1,6 +1,5 @@
-<!ENTITY charlifter.csubmenu.lift.label "Korije tèsk la pou...">
-<!ENTITY charlifter.citem.cancel.label "Cancel">
-<!ENTITY charlifter.citem.cancel.accesskey "C">
-<!ENTITY charlifter.citem.feedback.label "Submit Selection As Feedback">
-<!ENTITY charlifter.citem.feedback.accesskey "F">
-<!ENTITY charlifter.about.menu.label "About Accentuate.us">
+<!ENTITY charlifter.csubmenu.lift.label "Korije tèks la pou...">
+<!ENTITY charlifter.citem.cancel.label "Anile">
+<!ENTITY charlifter.citem.cancel.accesskey "A">
+<!ENTITY charlifter.citem.feedback.label "Soumèt seleksyon an tankou yon reyaksyon">
+<!ENTITY charlifter.citem.feedback.accesskey "R">
