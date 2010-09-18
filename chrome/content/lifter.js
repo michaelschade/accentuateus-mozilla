@@ -291,10 +291,17 @@ Charlifter.Lifter = function() {
             /*  Only display feedback item if
                 text is selected inside of text input */
             if (gContextMenu.onTextInput) {
-                let selectedText = focused.value.substring(
-                      focused.selectionStart
-                    , focused.selectionEnd
-                );
+                let selectedText = '';
+                try {
+                    selectedText = focused.value.substring(
+                          focused.selectionStart
+                        , focused.selectionEnd
+                    );
+                } catch(e) { // other HTML element
+                    focused = document.commandDispatcher
+                        .focusedWindow.document;
+                    selectedText = focused.getSelection();
+                }
                 if (selectedText != "") { liftFeedbackItem.disabled = false; }
                 else { liftFeedbackItem.disabled = true; }
             }
@@ -373,10 +380,9 @@ Charlifter.Lifter = function() {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
             let ihtml = false;
-            if(!focused) { // Get from an iframe
+            if(!focused) { // Get from other HTML element
                 focused = document.commandDispatcher
                     .focusedWindow.document.activeElement;
-                ihtml = true;
             }
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
@@ -476,11 +482,18 @@ Charlifter.Lifter = function() {
             // They've done this before...
             else { result = 0; }
             if (result == 0) {
+                let selectedText = '';
                 let focused = document.commandDispatcher.focusedElement;
-                let selectedText = focused.value.substring(
-                      focused.selectionStart
-                    , focused.selectionEnd
-                );
+                try {
+                    selectedText = focused.value.substring(
+                          focused.selectionStart
+                        , focused.selectionEnd
+                    );
+                } catch(e) { // other HTML element
+                    focused = document.commandDispatcher
+                        .focusedWindow.document;
+                    selectedText = focused.getSelection();
+                }
                 // Fail silently
                 try {
                 this.feedback(selectedText, function(aSuccess) {
