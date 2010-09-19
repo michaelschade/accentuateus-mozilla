@@ -1,0 +1,58 @@
+License
+=======
+Copyright 2010 [Spearhead Development, L.L.C.](http://www.sddomain.com/)
+
+This file is part of [Accentuate.us](http://accentuate.us/).
+
+Accentuate.us is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Accentuate.us is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
+
+Introduction
+============
+The Accentuate.us Firefox add-on allows you to type quickly and easily in more
+than 100 languages without extra keystrokes or a special keyboard. It works
+anywhere on the web: in your blog, web mail, social networking sites, or in
+online editors like Google Docs.
+
+Installation
+============
+The latest stable release can be found at [http://accentuate.us/get/firefox](http://accentuate.us/get/firefox).
+
+To install from source, edit *Makefile* and change the *profile_dir* line to your
+profile name as listed in the Mozilla Firefox preference directory (example,
+~/.mozilla/firefox/ on Linux).
+
+After the makefile is changed, for all systems but Linux:
+    make
+    make install
+
+For Linux:
+    make
+    export OSTYPE make install
+
+The add-on will be available upon a full restart of Firefox.
+
+Usage
+=====
+Under any editable form on a website, type text without accents and open
+the context menu, navigate to the "Accentuate Text For..." submenu, and
+select the desired language. The form field will be temporarily disabled
+and a wait cursor displayed when the cursor is over it until the add-on
+has received a response from the server or failed.
+
+Contributing
+============
+One major way to contribute to this add-on is by helping us translate it.
+We manage all translations through [Transifex](http://www.transifex.net/projects/p/charlifter-l10n/).
+
+To find all ways of translating, please see the [Accentuate.us contribute page](http://accentuate.us/contribute).
