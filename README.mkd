@@ -55,4 +55,4 @@ Contributing
 One major way to contribute to this add-on is by helping us translate it.
 We manage all translations through [Transifex](http://www.transifex.net/projects/p/charlifter-l10n/).
 
-To find all ways of translating, please see the [Accentuate.us contributing page](http://accentuate.us/contributing).
+To find all ways of contributing, please see the [Accentuate.us contributing page](http://accentuate.us/contributing).
