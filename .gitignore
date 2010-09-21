@@ -1,2 +1,3 @@
 *.swp
 *.fuse_hidden*
+bin/*
