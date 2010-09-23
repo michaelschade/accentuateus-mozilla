@@ -463,10 +463,6 @@ Charlifter.Lifter = function() {
                 switch(result) {
                     case 0: // Yes
                         cprefs.setBoolPref("feedback-success", true);
-                        prompts.alert(window
-                            , strbundle.getString("feedback-success-title")
-                            , strbundle.getString("feedback-success")
-                        );
                         break;
                     case 1: // No
                         prompts.alert(window
@@ -500,6 +496,19 @@ Charlifter.Lifter = function() {
                     }, function(aError) {}, function(aAbort) {}
                 );
                 } catch(e) {}
+                if (!cprefs.getBoolPref("feedback-success-hide")) {
+                    let hide = {value: false};
+                    prompts.alertCheck(window
+                        , strbundle.getString("feedback-success-title")
+                        , strbundle.getString("feedback-success")
+                        , strbundle.getString("feedback-success-hide")
+                        , hide
+                    );
+                    if (hide.value) {
+                        cprefs.setBoolPref("feedback-success-hide"
+                            , true);
+                    }
+                }
             }
         },
     }
