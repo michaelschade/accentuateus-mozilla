@@ -60,7 +60,7 @@ clean:
 # the default (first) target.
 include chrome/Makefile.in
 
-# The sources for the XPI file. Uses variables defined in the included
+# The sources for the XPI file.  Uses variables defined in the included
 # Makefiles.
 xpi_built := $(build_dir)/$(install_rdf) \
              $(build_dir)/$(chrome_manifest) \
