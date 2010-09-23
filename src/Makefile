@@ -78,7 +78,9 @@ install: $(build_dir) $(xpi_built)
 	@echo
 
 $(xpi_file): $(build_dir) $(xpi_built)
+	@echo "Checking for bad localization files..."
 	@bash tests/locale.sh
+	@echo "Everything looks good."
 	@echo "Creating XPI file."
 	@cp -Rf chrome/defaults $(build_dir)
 	@cd $(build_dir); $(ZIP) -r ../$(xpi_file) $(xpi_built_no_dir) defaults
