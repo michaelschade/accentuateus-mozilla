@@ -117,7 +117,10 @@ Charlifter.Lifter = function() {
         /* Abstracts API calling code */
         let BASE_URL = "api.accentuate.us:8080/";
         let url = "http://";
-        if ("undefined" == typeof(args['lang'])) { url += BASE_URL; }
+        if  ("undefined" == typeof(args['lang']) ||
+            (args['call'] == 'charlifter.feedback')) {
+                url += BASE_URL;
+        }
         else { url += args['lang'] + '.' + BASE_URL; }
         try {
             let durl = prefs.getBranch("charlifter.debug.")
