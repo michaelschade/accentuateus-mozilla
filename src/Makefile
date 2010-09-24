@@ -36,6 +36,9 @@ endif
 # The temporary location where the extension tree will be copied and built.
 build_dir := $(bin_dir)/build
 
+# Icon
+icon := icon.png
+
 # The install.rdf file.
 install_rdf := install.rdf
 
@@ -64,6 +67,7 @@ include chrome/Makefile.in
 # Makefiles.
 xpi_built := $(build_dir)/$(install_rdf) \
              $(build_dir)/$(chrome_manifest) \
+             $(build_dir)/$(icon) \
              $(chrome_jar_file)
 
 xpi_built_no_dir := $(subst $(build_dir)/,,$(xpi_built))
