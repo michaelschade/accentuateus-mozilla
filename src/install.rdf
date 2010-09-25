@@ -1,25 +1,22 @@
 <?xml version="1.0"?>
-
-<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-  xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-
-  <Description about="urn:mozilla:install-manifest">
-    <em:id>addons-mozilla@accentuate.us</em:id>
-    <em:name>Accentuate.us</em:name>
-    <em:description>Accentuate.us allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard.</em:description>
-    <em:version>0.9b2-2010-09-24-02</em:version>
-    <em:creator>Spearhead Development, L.L.C. (http://www.sddomain.com/)</em:creator>
-    <em:homepageURL>http://accentuate.us/</em:homepageURL>
-    <em:type>2</em:type>
-    <em:aboutURL>chrome://accentuateus/content/about.xul</em:aboutURL>
-
-    <!-- Mozilla Firefox -->
-    <em:targetApplication>
-      <Description>
-        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>3.6</em:minVersion>
-        <em:maxVersion>4.*</em:maxVersion>
-      </Description>
-    </em:targetApplication>
-  </Description>
-</RDF>
+<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="rdf:#$v5LjR"
+                   em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   em:minVersion="3.6"
+                   em:maxVersion="4.*" />
+  <RDF:Description RDF:about="urn:mozilla:install-manifest"
+                   em:id="addons-mozilla@accentuate.us"
+                   em:name="Accentuate.us"
+                   em:description="Accentuate.us allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard."
+                   em:version="0.9b2-2010-09-24-02"
+                   em:creator="Spearhead Development, L.L.C. (http://www.sddomain.com/)"
+                   em:homepageURL="http://accentuate.us/"
+                   em:type="2"
+                   em:aboutURL="chrome://accentuateus/content/about.xul"
+                   em:updateURL="http://accentuate.us/get/firefox/update"
+                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDSlJ5qYIi8uz8Y/bKv4wE9afVFfQXXLDxOvTBMmyeex9nyYjIHODMxUimXMmp0BgD5PwOptyL16lcd/ZtJJmPBH3EtonwJ+fzqIVdpzii9lFqkELRW4ySu5hvAFMBGCQYX1a+JDIHLx6m+VYzpDylTuNCMojpmW63DwQTpHQ7OnwIDAQAB">
+    <em:targetApplication RDF:resource="rdf:#$v5LjR"/>
+  </RDF:Description>
+</RDF:RDF>
