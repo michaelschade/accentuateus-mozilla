@@ -68,15 +68,30 @@ Charlifter.SQL = function() {
                 [ISO 639, Localized Name], ...] */
             let statement = query("INSERT INTO langs (code, localization)"
                 + " VALUES (:code, :localization)");
-            let params = statement.newBindingParamsArray();
-            for (let lang in langs) {
-                let bp = params.newBindingParams();
-                bp.bindByName("code",        langs[lang][0]);
-                bp.bindByName("localization",langs[lang][1]);
-                params.addParams(bp);
+            let params = null;
+            try { // newBindingParamsArray available
+                let params = statement.newBindingParamsArray();
+            } catch(err) { }
+            if (params != null) {
+                for (let lang in langs) {
+                    let bp = params.newBindingParams();
+                    bp.bindByName("code",        langs[lang][0]);
+                    bp.bindByName("localization",langs[lang][1]);
+                    params.addParams(bp);
+                }
+                statement.bindParameters(params);
+                statement.executeAsync(callbacks);
             }
-            statement.bindParameters(params);
-            statement.executeAsync(callbacks);
+            else {
+                for (let lang in langs) {
+                    statement.params.code = langs[lang][0];
+                    statement.params.localization = langs[lang][1];
+                    if (lang==langs.length) { // Last element
+                        statement.executeAsync(callbacks);
+                    }
+                    else { statement.executeAsync({}); }
+                }
+            }
         },
         getLangs : function(callbacks) {
             /* Return languages. */
