@@ -1,6 +1,6 @@
-<!ENTITY charlifter.csubmenu.lift.label "Accentuate Text For...">
-<!ENTITY charlifter.citem.cancel.label "Cancel">
+<!ENTITY charlifter.csubmenu.lift.label "Accentuar Texto Pro...">
+<!ENTITY charlifter.citem.cancel.label "Cancellar">
 <!ENTITY charlifter.citem.cancel.accesskey "C">
-<!ENTITY charlifter.citem.feedback.label "Submit Selection As Feedback">
+<!ENTITY charlifter.citem.feedback.label "Submitter Selection como Feedback">
 <!ENTITY charlifter.citem.feedback.accesskey "F">
-<!ENTITY charlifter.about.menu.label "About Accentuate.us">
+<!ENTITY charlifter.about.menu.label "Circa Accentuate.us">
