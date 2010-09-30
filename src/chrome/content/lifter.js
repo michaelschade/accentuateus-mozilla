@@ -20,6 +20,32 @@ if ("undefined" == typeof(Charlifter)) {
     var Charlifter = {};
 };
 
+let logging = false;
+function log(error) {
+    if (logging) {
+        try {
+            let dirService = Components.classes[
+                "@mozilla.org/file/directory_service;1"].getService(
+                    Components.interfaces.nsIProperties
+                );
+            let file = dirService.get("ProfD", Components.interfaces.nsIFile);
+            file.append("accentuateus.txt");
+            var foStream = Components.classes[
+                "@mozilla.org/network/file-output-stream;1"].createInstance(
+                    Components.interfaces.nsIFileOutputStream
+                );
+            foStream.init(file, 0x02 | 0x08 | 0x10, 0666, 0);
+            var converter = Components.classes[
+                "@mozilla.org/intl/converter-output-stream;1"].createInstance(
+                    Components.interfaces.nsIConverterOutputStream
+                );
+            converter.init(foStream, "UTF-8", 0, 0);
+            converter.writeString(error + '\n');
+            converter.close();
+        } catch(err) {}
+    }
+}
+
 Charlifter.SQL = function() {
     let db = null;
     let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
@@ -44,6 +70,7 @@ Charlifter.SQL = function() {
                 );
             }
             catch(err) {
+                log(err);
                 prompts.alert(window
                     , strbundle.getString("errors-title")
                     , strbundle.getString("errors-malfunction")
@@ -71,7 +98,9 @@ Charlifter.SQL = function() {
             let params = null;
             try { // newBindingParamsArray available
                 let params = statement.newBindingParamsArray();
-            } catch(err) { }
+            } catch(err) {
+                log(err);
+            }
             if (params != null) {
                 for (let lang in langs) {
                     let bp = params.newBindingParams();
@@ -141,7 +170,9 @@ Charlifter.Lifter = function() {
             let durl = prefs.getBranch("charlifter.debug.")
                 .getCharPref("hostname");
             url = durl;
-        } catch(e) { }
+        } catch(err) {
+            log(err);
+        }
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -254,6 +285,7 @@ Charlifter.Lifter = function() {
                 try {
                     response = JSON.parse(aSuccess.target.responseText);
                 } catch(err) {
+                    log(err);
                     prompts.alert(window
                         , strbundle.getString("errors-title")
                         , strbundle.getString("errors-communication"));
@@ -315,7 +347,8 @@ Charlifter.Lifter = function() {
                           focused.selectionStart
                         , focused.selectionEnd
                     );
-                } catch(e) { // other HTML element
+                } catch(err) { // other HTML element
+                    log(err);
                     focused = document.commandDispatcher
                         .focusedWindow.document;
                     selectedText = focused.getSelection();
@@ -331,7 +364,9 @@ Charlifter.Lifter = function() {
                 let request = null;
                 try {
                     request = pageElements[focused.getAttribute(cid)];
-                } catch(err) {}
+                } catch(err) {
+                    log(err);
+                }
                 // Check if something is being lifted
                 if (request != null) {
                     liftCancelItem.disabled = false;
@@ -391,7 +426,9 @@ Charlifter.Lifter = function() {
             let focused = document.commandDispatcher.focusedElement;
             try {
                 this.cancelLift(focused.getAttribute(cid));
-            } catch(err) {}
+            } catch(err) {
+                log(err);
+            }
             focused.readOnly = false;
         },
         liftSelection : function(lang) {
@@ -419,6 +456,7 @@ Charlifter.Lifter = function() {
                     try {
                         response = JSON.parse(aSuccess.target.responseText);
                     } catch(err) {
+                        log(err);
                         focused.readOnly = false;
                         focused.style.cursor = ocursor;
                         prompts.alert(window
@@ -503,7 +541,8 @@ Charlifter.Lifter = function() {
                           focused.selectionStart
                         , focused.selectionEnd
                     );
-                } catch(e) { // other HTML element
+                } catch(err) { // other HTML element
+                    log(err);
                     focused = document.commandDispatcher
                         .focusedWindow.document;
                     selectedText = focused.getSelection();
@@ -513,7 +552,9 @@ Charlifter.Lifter = function() {
                 this.feedback(selectedText, function(aSuccess) {
                     }, function(aError) {}, function(aAbort) {}
                 );
-                } catch(e) {}
+                } catch(err) {
+                    log(err);
+                }
                 if (!cprefs.getBoolPref("feedback-success-hide")) {
                     let hide = {value: false};
                     prompts.alertCheck(window
@@ -534,6 +575,7 @@ Charlifter.Lifter = function() {
 
 window.addEventListener("load", function() {
     // Have to get version now due to new asynchronous style
+    log("Initializing add-on.");
     try { // Old addon manager
         let gExtensionManager = Components.classes[
             "@mozilla.org/extensions/manager;1"]
@@ -542,6 +584,7 @@ window.addEventListener("load", function() {
             "addons-mozilla@accentuate.us").version;
         Charlifter.Lifter.init(version);
     } catch(err) { // New addon manager
+        log(err);
         Components.utils.import("resource://gre/modules/AddonManager.jsm");
             AddonManager.getAddonByID("addons-mozilla@accentuate.us",
                 function(addon) { Charlifter.Lifter.init(addon.version); }
