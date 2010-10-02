@@ -98,9 +98,7 @@ Charlifter.SQL = function() {
             let params = null;
             try { // newBindingParamsArray available
                 let params = statement.newBindingParamsArray();
-            } catch(err) {
-                log(err);
-            }
+            } catch(err) { log(err); }
             if (params != null) {
                 for (let lang in langs) {
                     let bp = params.newBindingParams();
@@ -170,9 +168,7 @@ Charlifter.Lifter = function() {
             let durl = prefs.getBranch("charlifter.debug.")
                 .getCharPref("hostname");
             url = durl;
-        } catch(err) {
-            log(err);
-        }
+        } catch(err) { log(err); }
         let request = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
         request.open("POST", url, true);
@@ -252,6 +248,22 @@ Charlifter.Lifter = function() {
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('"
                 + lang + "')");
+    };
+    let getSelection = function() {
+        let selectedText = '';
+        let focused = document.commandDispatcher.focusedElement;
+        try {
+            selectedText = focused.value.substring(
+                  focused.selectionStart
+                , focused.selectionEnd
+            );
+        } catch(err) { // other HTML element
+            log(err);
+            focused = document.commandDispatcher
+                .focusedWindow.document;
+            selectedText = focused.getSelection();
+        }
+        return selectedText;
     };
     return {
         init : function(ver) {
@@ -341,19 +353,7 @@ Charlifter.Lifter = function() {
             /*  Only display feedback item if
                 text is selected inside of text input */
             if (gContextMenu.onTextInput) {
-                let selectedText = '';
-                try {
-                    selectedText = focused.value.substring(
-                          focused.selectionStart
-                        , focused.selectionEnd
-                    );
-                } catch(err) { // other HTML element
-                    log(err);
-                    focused = document.commandDispatcher
-                        .focusedWindow.document;
-                    selectedText = focused.getSelection();
-                }
-                if (selectedText != "") { liftFeedbackItem.disabled = false; }
+                if (getSelection() != "") { liftFeedbackItem.disabled = false; }
                 else { liftFeedbackItem.disabled = true; }
             }
             else {
@@ -364,9 +364,7 @@ Charlifter.Lifter = function() {
                 let request = null;
                 try {
                     request = pageElements[focused.getAttribute(cid)];
-                } catch(err) {
-                    log(err);
-                }
+                } catch(err) { log(err); }
                 // Check if something is being lifted
                 if (request != null) {
                     liftCancelItem.disabled = false;
@@ -426,9 +424,7 @@ Charlifter.Lifter = function() {
             let focused = document.commandDispatcher.focusedElement;
             try {
                 this.cancelLift(focused.getAttribute(cid));
-            } catch(err) {
-                log(err);
-            }
+            } catch(err) { log(err); }
             focused.readOnly = false;
         },
         liftSelection : function(lang) {
@@ -510,11 +506,7 @@ Charlifter.Lifter = function() {
                     , (prompts.BUTTON_POS_0) * (prompts.BUTTON_TITLE_YES)
                         + (prompts.BUTTON_POS_1) * (prompts.BUTTON_TITLE_NO)
                         + (prompts.BUTTON_POS_2) * (prompts.BUTTON_TITLE_CANCEL)
-                    , ""
-                    , ""
-                    , ""
-                    , null
-                    , {}
+                    , "" , "", "", null, {}
                 );
                 switch(result) {
                     case 0: // Yes
@@ -534,27 +526,9 @@ Charlifter.Lifter = function() {
             // They've done this before...
             else { result = 0; }
             if (result == 0) {
-                let selectedText = '';
-                let focused = document.commandDispatcher.focusedElement;
-                try {
-                    selectedText = focused.value.substring(
-                          focused.selectionStart
-                        , focused.selectionEnd
-                    );
-                } catch(err) { // other HTML element
-                    log(err);
-                    focused = document.commandDispatcher
-                        .focusedWindow.document;
-                    selectedText = focused.getSelection();
-                }
-                // Fail silently
-                try {
-                this.feedback(selectedText, function(aSuccess) {
+                this.feedback(getSelection(), function(aSuccess) {
                     }, function(aError) {}, function(aAbort) {}
                 );
-                } catch(err) {
-                    log(err);
-                }
                 if (!cprefs.getBoolPref("feedback-success-hide")) {
                     let hide = {value: false};
                     prompts.alertCheck(window
