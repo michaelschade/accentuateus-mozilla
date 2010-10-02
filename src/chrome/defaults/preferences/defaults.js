@@ -17,8 +17,8 @@
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 */
 
-pref('charlifter.languages.version',                0);
-pref('charlifter.languages.locale',                 'en-US');
-pref('charlifter.languages.selection-code',         'ga');
-pref('charlifter.languages.feedback-success',       false);
-pref('charlifter.languages.feedback-success-hide',  false);
+pref('accentuateus.languages.version',              0);
+pref('accentuateus.languages.locale',               'en-US');
+pref('accentuateus.languages.selection-code',       'ga');
+pref('accentuateus.languages.feedback-success',     false);
+pref('accentuateus.languages.feedback-success-hide',false);
