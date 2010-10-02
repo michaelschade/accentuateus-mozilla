@@ -152,9 +152,9 @@ Charlifter.Lifter = function() {
         .getService(Components.interfaces.nsIPrefService);
     let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
-    let cprefs  = prefs.getBranch("charlifter.languages.");
+    let cprefs  = prefs.getBranch("accentuateus.languages.");
     let version = 'err';
-    let cid     = "_-charlifter-id"; // Charlifter attribute name
+    let cid     = "_-accentuateus-id"; // Charlifter attribute name
     let pageElements= {};
     let strbundle   = null;
     let genRequest  = function(args, success, error, abort) {
@@ -167,7 +167,7 @@ Charlifter.Lifter = function() {
         }
         else { url += args['lang'] + '.' + BASE_URL; }
         try {
-            let durl = prefs.getBranch("charlifter.debug.")
+            let durl = prefs.getBranch("accentuateus.debug.")
                 .getCharPref("hostname");
             url = durl;
         } catch(err) { log(err); }
