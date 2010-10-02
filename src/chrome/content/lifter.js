@@ -16,9 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 */
-if ("undefined" == typeof(Charlifter)) {
-    var Charlifter = {};
-};
+if ("undefined" == typeof(Charlifter)) { var Charlifter = {}; };
 
 let logging = false;
 function log(error) {
@@ -46,6 +44,7 @@ function log(error) {
     }
 }
 
+/* Handles SQLite code for add-on */
 Charlifter.SQL = function() {
     let db = null;
     let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
@@ -64,6 +63,7 @@ Charlifter.SQL = function() {
                                         .mozIStorageService);
             try {
                 db = storageService.openDatabase(file);
+                // Initialize lang table if not in existence
                 db.executeSimpleSQL(
                     "CREATE TABLE IF NOT EXISTS langs (code VARCHAR(5)"
                         + ", localization VARCHAR(255))"
@@ -76,7 +76,6 @@ Charlifter.SQL = function() {
                     , strbundle.getString("errors-malfunction")
                 );
             }
-            // Initialize lang table if not in existence
         }
     };
     let query = function(query) {
@@ -91,7 +90,7 @@ Charlifter.SQL = function() {
             statement.executeAsync(callbacks);
         },
         newLangs : function(langs, callbacks) {
-            /* Takes languages as [[ISO-639, Localized Name],
+            /* Stores languages. langs input: [[ISO-639, Localized Name],
                 [ISO 639, Localized Name], ...] */
             let statement = query("INSERT INTO langs (code, localization)"
                 + " VALUES (:code, :localization)");
@@ -99,7 +98,7 @@ Charlifter.SQL = function() {
             try { // newBindingParamsArray available
                 let params = statement.newBindingParamsArray();
             } catch(err) { log(err); }
-            if (params != null) {
+            if (params != null) { // Firefox 3.6+
                 for (let lang in langs) {
                     let bp = params.newBindingParams();
                     bp.bindByName("code",        langs[lang][0]);
@@ -109,11 +108,11 @@ Charlifter.SQL = function() {
                 statement.bindParameters(params);
                 statement.executeAsync(callbacks);
             }
-            else {
+            else { // Firefox 3.5
                 for (let lang in langs) {
                     statement.params.code = langs[lang][0];
                     statement.params.localization = langs[lang][1];
-                    if (lang==langs.length) { // Last element
+                    if (lang == langs.length) { // Last element
                         statement.executeAsync(callbacks);
                     }
                     else { statement.executeAsync({}); }
@@ -140,6 +139,7 @@ Charlifter.SQL = function() {
     }
 }();
 
+/* Handles user-interface and communication aspects for add-on */
 Charlifter.Lifter = function() {
     let codes = { // API Response Codes
           liftSuccess       : 200
@@ -148,14 +148,16 @@ Charlifter.Lifter = function() {
         , langListCurrent   : 200
     };
     let populatedLangTable = false;
-    let prefs = Components.classes["@mozilla.org/preferences-service;1"]
+    let prefs   = Components.classes["@mozilla.org/preferences-service;1"]
         .getService(Components.interfaces.nsIPrefService);
-    let cprefs = prefs.getBranch("charlifter.languages.");
-    let strbundle   = null;
-    let prompts     = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+    let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
+    let cprefs  = prefs.getBranch("charlifter.languages.");
     let version = 'err';
-    let genRequest     = function(args, success, error, abort) {
+    let cid     = "_-charlifter-id"; // Charlifter attribute name
+    let pageElements= {};
+    let strbundle   = null;
+    let genRequest  = function(args, success, error, abort) {
         /* Abstracts API calling code */
         let BASE_URL = "api.accentuate.us:8080/";
         let url = "http://";
@@ -220,10 +222,9 @@ Charlifter.Lifter = function() {
     let uuid = function() {
        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     }
-    let cid = "_-charlifter-id"; // Charlifter attribute name
-    let pageElements = {};
     let setLastLang = function() {
-        let liftItem    = document.getElementById(
+        /* Sets context menu default last language */
+        let liftItem = document.getElementById(
             "charlifter-cmenu-item-lift");
         let lang = cprefs.getCharPref("selection-code");
         Charlifter.SQL.getLangLocalization(lang, {
@@ -250,6 +251,7 @@ Charlifter.Lifter = function() {
                 + lang + "')");
     };
     let getSelection = function() {
+        /* Gets selected text either from standard element or iframe */
         let selectedText = '';
         let focused = document.commandDispatcher.focusedElement;
         try {
@@ -267,6 +269,7 @@ Charlifter.Lifter = function() {
     };
     return {
         init : function(ver) {
+            /* Initializes Lifter */
             version = ver;
             strbundle = document.getElementById("charlifter-string-bundle");
             let liftItem = document.getElementById(
@@ -292,6 +295,7 @@ Charlifter.Lifter = function() {
             setLastLang();
         },
         populateLangTable : function() {
+            /* Populates language table with new list */
             this.getLangs(function(aSuccess) {
                 let response = {};
                 try {
@@ -417,10 +421,12 @@ Charlifter.Lifter = function() {
             return request;
         },
         cancelLift : function(cid) {
+            /* Cancels indexed lift (slow network, etc.) */
             pageElements[cid].abort();
             pageElements[cid] = null;
         },
         cancelLiftSelection : function() {
+            /* Cancels lift for element */
             let focused = document.commandDispatcher.focusedElement;
             try {
                 this.cancelLift(focused.getAttribute(cid));
@@ -487,6 +493,7 @@ Charlifter.Lifter = function() {
                 });
         },
         feedback : function(text, success, error, abort) {
+            /* Submits feedback text for last used language */
             let request = genRequest({
                   call:     "charlifter.feedback"
                 , "lang":   cprefs.getCharPref("selection-code")
@@ -496,11 +503,12 @@ Charlifter.Lifter = function() {
             return request;
         },
         feedbackSelection : function() {
+            /* Submits selected text for feedback */
             // No previous successful feedback submission
             let result = 2;
             if (!cprefs.getBoolPref("feedback-success")) {
-                result = prompts.confirmEx(
-                      window
+                // Confirm feedback submission
+                result = prompts.confirmEx(window
                     , strbundle.getString("feedback-confirm-title")
                     , strbundle.getString("feedback-confirm")
                     , (prompts.BUTTON_POS_0) * (prompts.BUTTON_TITLE_YES)
@@ -518,7 +526,7 @@ Charlifter.Lifter = function() {
                             , strbundle.getString("feedback-fail")
                         );
                         break;
-                    case 2:
+                    case 2: // Cancel
                     default:
                         break;
                 }
