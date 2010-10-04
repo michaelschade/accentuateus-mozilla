@@ -1,6 +1,6 @@
-<!ENTITY charlifter.csubmenu.lift.label "Accentuate Text For...">
-<!ENTITY charlifter.citem.cancel.label "Cancel">
-<!ENTITY charlifter.citem.cancel.accesskey "C">
-<!ENTITY charlifter.citem.feedback.label "Submit Selection As Feedback">
-<!ENTITY charlifter.citem.feedback.accesskey "F">
-<!ENTITY charlifter.about.menu.label "About Accentuate.us">
+<!ENTITY charlifter.csubmenu.lift.label "Herstel teks vir...">
+<!ENTITY charlifter.citem.cancel.label "Kanselleer">
+<!ENTITY charlifter.citem.cancel.accesskey "A">
+<!ENTITY charlifter.citem.feedback.label "Dien seleksie in as terugvoer">
+<!ENTITY charlifter.citem.feedback.accesskey "t">
+<!ENTITY charlifter.about.menu.label "Aangaande Accentuate.us">
