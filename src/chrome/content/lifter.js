@@ -221,8 +221,7 @@ Charlifter.Lifter = function() {
                     , strbundle.getString("errors-communication")
                 );
             },
-            handleCompletion: function(aCompletion) {
-            },
+            handleCompletion: function(aCompletion) {},
         });
     };
     let S4 = function() {
@@ -245,8 +244,10 @@ Charlifter.Lifter = function() {
                         , lang
                     ]
                 ));
+                liftItem.hidden = false;
             },
             handleError: function(aError) {
+                liftItem.hidden = true;
                 Charlifter.Util.log(aError);
                 prompts.alert(window
                     , strbundle.getString(
@@ -333,13 +334,11 @@ Charlifter.Lifter = function() {
                             langs[langPair] = langs[langPair].split(':');
                         }
                         Charlifter.SQL.clearLangs({
-                            handleResult: function(aResultSet) {
-                            },
+                            handleResult: function(aResultSet) {},
                             handleError: function(aError) {
                                 Charlifter.Util.log(aError);
                             },
-                            handleCompletion: function(aCompletion) {
-                            },
+                            handleCompletion: function(aCompletion) {},
                         });
                         Charlifter.SQL.newLangs(langs, {
                             handleResult: function(aResultSet) {},
@@ -409,7 +408,6 @@ Charlifter.Lifter = function() {
                 liftCancelItem.disabled     = true;
                 Charlifter.Lifter.populateLangTable();
             }
-            liftItem.hidden = (liftItem.label == '') ? true : false;
         },
         getLangs : function(success, error, abort) {
             /* API Call: Get language list */
