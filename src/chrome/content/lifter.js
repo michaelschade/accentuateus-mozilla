@@ -165,6 +165,7 @@ Charlifter.Lifter = function() {
     let cid     = "_-accentuateus-id"; // Charlifter attribute name
     let pageElements= {};
     let strbundle   = null;
+    let lastLang    = {lang: '', label: ''}
     let genRequest  = function(args, success, error, abort) {
         /* Abstracts API calling code */
         let BASE_URL = "api.accentuate.us:8080/";
@@ -237,13 +238,9 @@ Charlifter.Lifter = function() {
         let lang = cprefs.getCharPref("selection-code");
         Charlifter.SQL.getLangLocalization(lang, {
             handleResult: function(aResult) {
-                liftItem.setAttribute("label"
-                    , strbundle.getFormattedString("lift-citem-label", [
-                          aResult.getNextRow().getResultByName(
-                            "localization")
-                        , lang
-                    ]
-                ));
+                lastLang.lang = lang;
+                lastLang.label = aResult.getNextRow().getResultByName(
+                    "localization");
                 liftItem.hidden = false;
             },
             handleError: function(aError) {
@@ -258,8 +255,7 @@ Charlifter.Lifter = function() {
             handleCompletion: function(aCompletion) {},
         });
         liftItem.setAttribute("oncommand",
-            "Charlifter.Lifter.liftSelection('"
-                + lang + "')");
+            "Charlifter.Lifter.liftSelection('" + lang + "')");
     };
     let getSelection = function() {
         /* Gets selected text either from standard element or iframe */
@@ -380,11 +376,15 @@ Charlifter.Lifter = function() {
                 if (getSelection() != "") { liftFeedbackItem.disabled = false; }
                 else { liftFeedbackItem.disabled = true; }
             }
-            else {
-                liftFeedbackItem.disabled = true;
-            }
+            else { liftFeedbackItem.disabled = true; }
+            /* Label for accentuating all or just highlighted text */
+            let property = (getSelection() == '') ? "lift-citem-label"
+                : "lift-citem-selection-label";
+            liftItem.label = strbundle.getFormattedString(property
+                , [lastLang.label, lastLang.lang]
+            );
             if (langsMenu.childNodes[0].childNodes.length != 0) {
-                setLastLang();
+                //setLastLang();
                 let request = null;
                 try {
                     request = pageElements[focused.getAttribute(cid)];
@@ -462,9 +462,16 @@ Charlifter.Lifter = function() {
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
             let value = focused.value;
+            let result = {}; // Selection result
             if (typeof(value) == 'undefined') {
                 ihtml = true;
                 value = focused.innerHTML;
+            }
+            else if (getSelection() != '') {
+                result.begin = focused.substring(0, focused.selectionStart);
+                result.middle = focused.substring(focused.selectionStart
+                    , focused.selectionEnd);
+                result.end = focused.substring(focused.selectionEnd);
             }
             focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
@@ -485,7 +492,12 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
+                            window.alert(result);
                             if (ihtml) { focused.innerHTML = response.text; }
+                            else if (typeof(result.begin) != 'undefined') {
+                                focused.value = result.begin + response.text
+                                    + result.end;
+                            }
                             else { focused.value = response.text; }
                             break;
                         case codes.liftFailUnknown:
