@@ -468,10 +468,12 @@ Charlifter.Lifter = function() {
                 value = focused.innerHTML;
             }
             else if (getSelection() != '') {
-                result.begin = focused.substring(0, focused.selectionStart);
-                result.middle = focused.substring(focused.selectionStart
+                result.begin = focused.value.substring(0
+                    , focused.selectionStart);
+                result.middle = focused.value.substring(focused.selectionStart
                     , focused.selectionEnd);
-                result.end = focused.substring(focused.selectionEnd);
+                result.end = focused.value.substring(focused.selectionEnd);
+                value = result.middle;
             }
             focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
@@ -492,7 +494,6 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
-                            window.alert(result);
                             if (ihtml) { focused.innerHTML = response.text; }
                             else if (typeof(result.begin) != 'undefined') {
                                 focused.value = result.begin + response.text
