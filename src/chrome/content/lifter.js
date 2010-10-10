@@ -269,8 +269,8 @@ Charlifter.Lifter = function() {
         } catch(err) { // other HTML element
             Charlifter.Util.log(err);
             focused = document.commandDispatcher
-                .focusedWindow.document;
-            selectedText = focused.getSelection();
+                .focusedWindow;
+            selectedText = focused.getSelection().toString();
         }
         return selectedText;
     };
@@ -454,26 +454,41 @@ Charlifter.Lifter = function() {
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = document.commandDispatcher.focusedElement;
-            let ihtml = false;
             if(!focused) { // Get from other HTML element
                 focused = document.commandDispatcher
                     .focusedWindow.document.activeElement;
             }
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
-            let value = focused.value;
-            let result = {}; // Selection result
+            let value   = focused.value;
+            let selected= false;
+            let ihtml   = false;
+            let result  = {};
             if (typeof(value) == 'undefined') {
                 ihtml = true;
                 value = focused.innerHTML;
             }
-            else if (getSelection() != '') {
-                result.begin = focused.value.substring(0
-                    , focused.selectionStart);
-                result.middle = focused.value.substring(focused.selectionStart
-                    , focused.selectionEnd);
-                result.end = focused.value.substring(focused.selectionEnd);
-                value = result.middle;
+            if (getSelection() != '') { // Handling only highlighted text
+                if (ihtml) { // rich text
+                    let selection = document.commandDispatcher
+                        .focusedWindow.getSelection().getRangeAt(0);
+                    // Tracker "layer" to later update selection
+                    result.span = selection.startContainer.ownerDocument
+                        .createElement("layer");
+                    let docfrag = selection.extractContents();
+                    result.span.appendChild(docfrag);
+                    selection.insertNode(result.span);
+                    value = result.span.innerHTML;
+                }
+                else { // other
+                    result.begin= focused.value.substring(0
+                        , focused.selectionStart);
+                    result.end  = focused.value.substring(focused.selectionEnd);
+                    result.stop = focused.selectionEnd;
+                    value = focused.value.substring(focused.selectionStart
+                        , focused.selectionEnd);
+                }
+                selected = true;
             }
             focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
@@ -486,18 +501,32 @@ Charlifter.Lifter = function() {
                         response = JSON.parse(aSuccess.target.responseText);
                     } catch(err) {
                         Charlifter.Util.log(err);
-                        focused.readOnly = false;
-                        focused.style.cursor = ocursor;
                         prompts.alert(window
                             , strbundle.getString("errors-title")
                             , strbundle.getString("errors-communication"));
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
-                            if (ihtml) { focused.innerHTML = response.text; }
-                            else if (typeof(result.begin) != 'undefined') {
+                            if (ihtml) {
+                                if (selected) {
+                                    result.span.innerHTML = response.text;
+                                    // Remove our tracking "layer"
+                                    while (result.span.firstChild) {
+                                        result.span.parentNode.insertBefore(
+                                              result.span.firstChild
+                                            , result.span);
+                                    }
+                                    result.span.parentNode.removeChild(
+                                        result.span);
+                                }
+                                else { focused.innerHTML = response.text; }
+                            }
+                            else if (selected) {
                                 focused.value = result.begin + response.text
                                     + result.end;
+                                focused.focus();
+                                focused.setSelectionRange(result.stop
+                                    , result.stop);
                             }
                             else { focused.value = response.text; }
                             break;
