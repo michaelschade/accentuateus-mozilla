@@ -524,11 +524,11 @@ Charlifter.Lifter = function() {
                             else if (selected) {
                                 focused.value = result.begin + response.text
                                     + result.end;
-                                focused.focus();
                                 focused.setSelectionRange(result.stop
                                     , result.stop);
                             }
                             else { focused.value = response.text; }
+                            focused.focus();
                             break;
                         case codes.liftFailUnknown:
                             prompts.alert(window
