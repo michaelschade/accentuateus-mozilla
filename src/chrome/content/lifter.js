@@ -302,7 +302,7 @@ Charlifter.Lifter = function() {
                         cprefs.setIntPref("version", 0);
                     }
                 },
-                handleError: function(aE) { Charlifter.Util.log(aError); },
+                handleError: function(aE) { Charlifter.Util.log(aE); },
                 handleCompletion: function(aC) {
                     Charlifter.Lifter.populateLangTable();
                     setLastLang();
