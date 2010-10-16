@@ -188,8 +188,8 @@ Charlifter.Lifter = function() {
         request.onabort = abort;
         request.setRequestHeader("User-Agent", "Accentuate.us/" + version
             + ' ' + window.navigator.userAgent);
-        request.setRequestHeader("Content-Type", "application/json");
-        request.setRequestHeader("charset", "UTF-8");
+        request.setRequestHeader("Content-Type"
+            , "application/json; charset=utf-8");
         request.send(JSON.stringify(args));
         return request;
     };

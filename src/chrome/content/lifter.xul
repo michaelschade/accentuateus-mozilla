@@ -51,8 +51,8 @@
             disabled        = "true"
         />
         <menu id            = "charlifter-cmenu-languages-item"
-                insertafter = "context-viewinfo"
-            >
+            insertafter     = "context-viewinfo"
+        >
             <menupopup>
             </menupopup>
         </menu>
