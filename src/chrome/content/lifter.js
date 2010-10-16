@@ -377,14 +377,20 @@ Charlifter.Lifter = function() {
                 else { liftFeedbackItem.disabled = true; }
             }
             else { liftFeedbackItem.disabled = true; }
-            /* Label for accentuating all or just highlighted text */
-            let property = (getSelection() == '') ? "lift-citem-label"
-                : "lift-citem-selection-label";
-            liftItem.label = strbundle.getFormattedString(property
+            /* Label for accentuating all or just selected text */
+            let liftProperty, langsMenuProperty;
+            if (!getSelection()) {
+                liftProperty = "lift-citem-label";
+                langsMenuProperty = "lift-cmenu-label";
+            } else {
+                liftProperty = "lift-citem-selection-label";
+                langsMenuProperty = "lift-cmenu-label-selected";
+            }
+            liftItem.label = strbundle.getFormattedString(liftProperty
                 , [lastLang.label, lastLang.lang]
             );
+            langsMenu.label = strbundle.getString(langsMenuProperty);
             if (langsMenu.childNodes[0].childNodes.length != 0) {
-                //setLastLang();
                 let request = null;
                 try {
                     request = pageElements[focused.getAttribute(cid)];
@@ -436,6 +442,7 @@ Charlifter.Lifter = function() {
             }, success, error, abort);
             /* Store last used language code and localization in preferences */
             cprefs.setCharPref("selection-code", lang);
+            setLastLang();
             return request;
         },
         cancelLift : function(cid) {
