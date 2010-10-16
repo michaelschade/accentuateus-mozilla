@@ -236,6 +236,7 @@ Charlifter.Lifter = function() {
         let liftItem = document.getElementById(
             "charlifter-cmenu-item-lift");
         let lang = cprefs.getCharPref("selection-code");
+        liftItem.hidden = true; // Default to hidden
         Charlifter.SQL.getLangLocalization(lang, {
             handleResult: function(aResult) {
                 lastLang.lang = lang;
@@ -244,7 +245,6 @@ Charlifter.Lifter = function() {
                 liftItem.hidden = false;
             },
             handleError: function(aError) {
-                liftItem.hidden = true;
                 Charlifter.Util.log(aError);
                 prompts.alert(window
                     , strbundle.getString(
@@ -347,6 +347,7 @@ Charlifter.Lifter = function() {
                             },
                         });
                         cprefs.setIntPref("version", response.version);
+                        setLastLang();
                         break;
                     case codes.langListCurrent:
                         populateLangsMenu();
