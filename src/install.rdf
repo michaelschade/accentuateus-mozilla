@@ -18,5 +18,61 @@
                    em:updateURL="http://accentuate.us/get/firefox/update"
                    em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDSlJ5qYIi8uz8Y/bKv4wE9afVFfQXXLDxOvTBMmyeex9nyYjIHODMxUimXMmp0BgD5PwOptyL16lcd/ZtJJmPBH3EtonwJ+fzqIVdpzii9lFqkELRW4ySu5hvAFMBGCQYX1a+JDIHLx6m+VYzpDylTuNCMojpmW63DwQTpHQ7OnwIDAQAB">
     <em:targetApplication RDF:resource="rdf:#$v5LjR"/>
+    <em:localized>
+      <Description>
+        <em:locale>en-IE</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>This add-on is an interface to the Accentuate.us language service that allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>en-US</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>This add-on is an interface to the Accentuate.us language service that allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>af</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>Hierdie byvoeging is 'n koppelvlak tot die Accentuate.us-diens vir tale wat dit moontlik maak om vinnig en maklik in meer as 100 tale te tik sonder onnodige getik of spesiale sleutelbord.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>en-ZA</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>This add-on is an interface to the Accentuate.us language service that allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>en-GB</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>This add-on is an interface to the Accentuate.us language service that allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ht</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>Modil sa a se yon entèfas pou Accentuate.us sèvis lang ki pèmèt ou tape vit ak fasilite an plis ke 100 lang san plis konbinezon touchosinon yon klavye espesyal.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ia</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>Iste Add-on es un interfacie a le servicio de linguage Accentuate.us que il permitte te de typar rapidemente e facilemente in plure de 100 linguages sin extra claves o claviero special.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ga</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>Is éard atá sa bhreiseán seo ná comhéadan ar sheirbhís teanga Accentuate.us a ligeann duit clóscríobh go sciobtha i níos mó ná 100 teanga, gan eochairbhuillí breise agus gan méarchlár speisialta.</em:description>
+      </Description>
+    </em:localized>
   </RDF:Description>
 </RDF:RDF>
