@@ -22,7 +22,7 @@ if ("undefined" == typeof(Charlifter)) { var Charlifter = {}; };
 Charlifter.Util = function() {
     let prefs = Components.classes["@mozilla.org/preferences-service;1"]
         .getService(Components.interfaces.nsIPrefService).getBranch(
-            "accentuateus.debug."
+            "extensions.accentuateus.debug."
         );
     let logging = false;
     try { logging = prefs.getBoolPref("logging"); }
@@ -160,7 +160,7 @@ Charlifter.Lifter = function() {
         .getService(Components.interfaces.nsIPrefService);
     let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
-    let cprefs  = prefs.getBranch("accentuateus.languages.");
+    let cprefs  = prefs.getBranch("extensions.accentuateus.languages.");
     let version = 'err';
     let cid     = "_-accentuateus-id"; // Charlifter attribute name
     let pageElements= {};
@@ -176,7 +176,7 @@ Charlifter.Lifter = function() {
         }
         else { url += args['lang'] + '.' + BASE_URL; }
         try {
-            let durl = prefs.getBranch("accentuateus.debug.")
+            let durl = prefs.getBranch("extensions.accentuateus.debug.")
                 .getCharPref("hostname");
             url = durl;
         } catch(err) { Charlifter.Util.log(err); }
@@ -277,7 +277,7 @@ Charlifter.Lifter = function() {
     let getLocale = function() {
         let locale = window.navigator.language;
         try {
-            locale = prefs.getBranch("accentuateus.debug.")
+            locale = prefs.getBranch("extensions.accentuateus.debug.")
                 .getCharPref("locale");
         } catch(err) { Charlifter.Util.log(err); }
         return locale;
