@@ -385,7 +385,7 @@ Charlifter.Lifter = function() {
                 langsMenuProperty = "lift-cmenu-label";
             } else {
                 liftProperty = "lift-citem-selection-label";
-                langsMenuProperty = "lift-cmenu-label-selected";
+                langsMenuProperty = "lift-cmenu-selection-label";
             }
             liftItem.label = strbundle.getFormattedString(liftProperty
                 , [lastLang.label, lastLang.lang]
