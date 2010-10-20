@@ -289,8 +289,8 @@ Charlifter.Lifter = function() {
             strbundle = document.getElementById("charlifter-string-bundle");
             let liftItem = document.getElementById(
                 "charlifter-cmenu-item-lift");
-            liftItem.accesskey = strbundle.getString(
-                "lift-citem-label-accesskey");
+            liftItem.setAttribute('accesskey', strbundle.getString(
+                "lift-citem-label-accesskey"));
             /* Create dynamic menu of available languages */
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
