@@ -334,7 +334,6 @@ Charlifter.Lifter = function() {
                     case codes.langListOutdated:
                         /* New list available. Clear old languages
                             and insert new list to database. */
-                        window.alert(response.text);
                         let langs = response.text.split('\n');
                         for (let langPair in langs) {
                             langs[langPair] = langs[langPair].split(':');
