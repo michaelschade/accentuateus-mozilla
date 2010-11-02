@@ -168,7 +168,7 @@ Charlifter.Lifter = function() {
     let lastLang    = {lang: '', label: ''}
     let genRequest  = function(args, success, error, abort) {
         /* Abstracts API calling code */
-        let BASE_URL = "api.accentuate.us:8080/";
+        let BASE_URL = "api.accentuate.us:8081/";
         let url = "http://";
         if  ("undefined" == typeof(args['lang']) ||
             (args['call'] == 'charlifter.feedback')) {
@@ -197,6 +197,8 @@ Charlifter.Lifter = function() {
         /* Populate language list menu. */
         let langsMenu = document.getElementById(
             "charlifter-cmenu-languages-item");
+        let langs = 0;
+        let langsArray = [];
         Charlifter.SQL.getLangs({
             handleResult: function(aResultSet) {
                 let menupopup = langsMenu.firstChild;
@@ -205,14 +207,12 @@ Charlifter.Lifter = function() {
                 }
                 for (let row=aResultSet.getNextRow();
                     row; row=aResultSet.getNextRow()) {
-                        let ele = langsMenu.appendItem(
-                            ( row.getResultByName("code")
-                            + ": " + row.getResultByName("localization")
-                            ), row.getResultByName("code")
-                        );
-                        ele.setAttribute("oncommand",
-                            "Charlifter.Lifter.liftSelection('"
-                                + row.getResultByName("code") + "')");
+                        // Store for processing after query completion
+                        langsArray[langs] = [
+                              row.getResultByName("code")
+                            , row.getResultByName("localization")
+                        ];
+                        langs++;
                 }
             },
             handleError: function(aError) {
@@ -222,7 +222,16 @@ Charlifter.Lifter = function() {
                     , strbundle.getString("errors-communication")
                 );
             },
-            handleCompletion: function(aCompletion) {},
+            handleCompletion: function(aCompletion) {
+                for (let l=0; l<langs; l++) {
+                    let code = langsArray[l][0], local = langsArray[l][1];
+                    // Add to context menu
+                    let ele = langsMenu.appendItem(code + ": " + local, code);
+                    ele.setAttribute("oncommand",
+                        "Charlifter.Lifter.liftSelection('" + code + "')"
+                    );
+                }
+            },
         });
     };
     let S4 = function() {
@@ -325,6 +334,7 @@ Charlifter.Lifter = function() {
                     case codes.langListOutdated:
                         /* New list available. Clear old languages
                             and insert new list to database. */
+                        window.alert(response.text);
                         let langs = response.text.split('\n');
                         for (let langPair in langs) {
                             langs[langPair] = langs[langPair].split(':');
