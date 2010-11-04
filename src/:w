@@ -264,18 +264,10 @@ Charlifter.Lifter = function() {
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('" + lang + "')");
     };
-    let getFocused = function() {
-        let focused = document.commandDispatcher.focusedElement;
-        if(!focused) { // Get from other HTML element
-            focused = document.commandDispatcher
-                .focusedWindow.document.activeElement;
-        }
-        return focused;
-    };
     let getSelection = function() {
         /* Gets selected text either from standard element or iframe */
         let selectedText = '';
-        let focused = getFocused();
+        let focused = document.commandDispatcher.focusedElement;
         try {
             selectedText = focused.value.substring(
                   focused.selectionStart
@@ -284,7 +276,7 @@ Charlifter.Lifter = function() {
         } catch(err) { // other HTML element
             Charlifter.Util.log(err);
             focused = document.commandDispatcher
-                .focusedWindow; // Selections are handled differently
+                .focusedWindow;
             selectedText = focused.getSelection().toString();
         }
         return selectedText;
@@ -385,7 +377,7 @@ Charlifter.Lifter = function() {
                 "charlifter-cmenu-item-lift-cancel");
             let liftFeedbackItem = document.getElementById(
                 "charlifter-cmenu-item-lift-feedback");
-            let focused = getFocused();
+            let focused = document.commandDispatcher.focusedElement;
             /*  Only display feedback item if
                 text is selected inside of text input */
             if (gContextMenu.onTextInput) {
@@ -463,7 +455,7 @@ Charlifter.Lifter = function() {
         },
         cancelLiftSelection : function() {
             /* Cancels lift for element */
-            let focused = getFocused();
+            let focused = document.commandDispatcher.focusedElement;
             try {
                 this.cancelLift(focused.getAttribute(cid));
             } catch(err) { Charlifter.Util.log(err); }
@@ -471,7 +463,11 @@ Charlifter.Lifter = function() {
         },
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
-            let focused = getFocused();
+            let focused = document.commandDispatcher.focusedElement;
+            if(!focused) { // Get from other HTML element
+                focused = document.commandDispatcher
+                    .focusedWindow.document.activeElement;
+            }
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
             let value   = focused.value;
