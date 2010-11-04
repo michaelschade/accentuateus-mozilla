@@ -81,11 +81,7 @@ Charlifter.SQL = function() {
     let connect = function() {
         /* Connects to sqlite file if not already done so */
         if (db === null) {
-            let file  = Components.classes["@mozilla.org/file/"
-                        + "directory_service;1"]
-                         .getService(Components.interfaces.nsIProperties)
-                         .get("ProfD", Components.interfaces.nsIFile);
-            file.append("accentuateus.sqlite");
+            let file = Charlifter.Util.getFile("accentuateus.sqlite");
             let storageService = Components.classes["@mozilla.org/storage"
                                  + "/service;1"]
                                     .getService(Components.interfaces
