@@ -23,7 +23,9 @@ Charlifter.Util = function() {
         .getService(Components.interfaces.nsIPrefService).getBranch(
             "extensions.accentuateus.debug."
         );
-    let logging = false;
+    let logging   = false;
+    let observer  = null;
+    let eobserver = function() { this.register(); }; // Holds observer logic
     try { logging = prefs.getBoolPref("logging"); }
     catch (err) {}
     return {
@@ -69,6 +71,42 @@ Charlifter.Util = function() {
                     this.getFile("accentuateus.sqlite").remove(false);
                 } catch(err) {}
             }
+            /* Unregistor extension manager observer (Gecko < 2)*/
+            if (observer != null) { observer.unregister(); }
+        },
+        registerUninstaller : function() {
+            /* For Gecko < 2, registers extension uninstall observer */
+            eobserver.prototype = {
+                observe: function(subject, topic, data) {
+                    /* Handle observed events */
+                    let updateItem = subject.QueryInterface(Ci.nsISupports)
+                        .QueryInterface(Ci.nsIUpdateItem);
+                    if (updateItem.id == "addons-mozilla@accentuate.us") {
+                        switch(data) {
+                            case "item-uninstalled":
+                                Charlifter.Util.uninstalled = true;
+                                break;
+                            case "item-cancel-action":
+                                Charlifter.Util.uninstalled = false;
+                                break;
+                            default: break;
+                        }
+                    }
+                },
+                register: function() {
+                    /* Register observer */
+                    let oservice = Cc["@mozilla.org/observer-service;1"]
+                        .getService(Components.interfaces.nsIObserverService);
+                    oservice.addObserver(this, "em-action-requested", false);
+                },
+                unregister: function() {
+                    /* Unregister observer */
+                    let oservice = Cc["@mozilla.org/observer-service;1"]
+                        .getService(Components.interfaces.nsIObserverService);
+                    oservice.removeObserver(this, "em-action-requested");
+                }
+            }
+            observer = new eobserver();
         },
     }
 }();
@@ -652,6 +690,7 @@ window.addEventListener("load", function() {
         let version = gExtensionManager.getItemForID(
             "addons-mozilla@accentuate.us").version;
         Charlifter.Lifter.init(version);
+        Charlifter.Util.registerUninstaller();
     } catch(err) { // New addon manager
         Charlifter.Util.log(err);
         Components.utils.import("resource://gre/modules/AddonManager.jsm");
