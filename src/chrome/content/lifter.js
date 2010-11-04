@@ -18,7 +18,6 @@
 */
 if ("undefined" == typeof(Charlifter)) { var Charlifter = {}; };
 
-
 Charlifter.Util = function() {
     let prefs = Components.classes["@mozilla.org/preferences-service;1"]
         .getService(Components.interfaces.nsIPrefService).getBranch(
@@ -28,14 +27,21 @@ Charlifter.Util = function() {
     try { logging = prefs.getBoolPref("logging"); }
     catch (err) {}
     return {
+        uninstalled: false,
+        getFile : function(name) {
+            /* Returns NSIFile object for file of provided name */
+            let dirService = Components.classes[
+                "@mozilla.org/file/directory_service;1"].getService(
+                    Components.interfaces.nsIProperties
+                );
+            let file = dirService.get("ProfD", Components.interfaces.nsIFile);
+            file.append(name);
+            return file;
+        },
         log : function(error) {
+            /* Logs errors if debug logging is enabled */
             if (logging) { try {
-                let dirService = Components.classes[
-                    "@mozilla.org/file/directory_service;1"].getService(
-                        Components.interfaces.nsIProperties
-                    );
-                let file = dirService.get("ProfD", Components.interfaces.nsIFile);
-                file.append("accentuateus.txt");
+                let file = this.getFile("accentuateus.txt");
                 var foStream = Components.classes[
                     "@mozilla.org/network/file-output-stream;1"].createInstance(
                         Components.interfaces.nsIFileOutputStream
@@ -49,6 +55,20 @@ Charlifter.Util = function() {
                 converter.writeString(error + '\n');
                 converter.close();
             } catch(err) {} }
+        },
+        uninstall : function() {
+            /* Clean up for add-on uninstallation */
+            if (this.uninstalled) {
+                // Log file
+                let log = this.getFile("accentuateus.txt");
+                try {
+                    log.remove(false);
+                } catch(err) { this.log(err); }
+                // Database
+                try {
+                    this.getFile("accentuateus.sqlite").remove(false);
+                } catch(err) {}
+            }
         },
     }
 }();
@@ -639,8 +659,26 @@ window.addEventListener("load", function() {
     } catch(err) { // New addon manager
         Charlifter.Util.log(err);
         Components.utils.import("resource://gre/modules/AddonManager.jsm");
+            // Init with version
             AddonManager.getAddonByID("addons-mozilla@accentuate.us",
                 function(addon) { Charlifter.Lifter.init(addon.version); }
             );
+            // Add uninstall listener
+            AddonManager.addAddonListener({
+                onUninstalling: function(addon) {
+                    if (addon.id == "addons-mozilla@accentuate.us") {
+                        Charlifter.Util.uninstalled = true;
+                    }
+                },
+                onOperationCancelled: function(addon) {
+                    if (addon.id == "addons-mozilla@accentuate.us") {
+                        Charlifter.Util.uninstalled = false;
+                    }
+                },
+            });
     }
+}, false);
+
+window.addEventListener("unload", function() {
+    Charlifter.Util.uninstall();
 }, false);
