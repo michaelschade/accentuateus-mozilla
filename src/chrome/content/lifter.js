@@ -602,7 +602,7 @@ Charlifter.Lifter = function() {
                                     }
                                     result.span.parentNode.removeChild(
                                         result.span);
-                                    window.alert(response.span.innerHTML);
+                                    //window.alert(response.span.innerHTML);
                                 } else { focused.innerHTML = response.text; }
                             }
                             else if (selected) { // Plain text + selected
