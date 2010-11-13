@@ -591,7 +591,7 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
-                            if (ihtml) {
+                            if (ihtml) { // Rich text
                                 if (selected) {
                                     result.span.innerHTML = response.text;
                                     // Remove our tracking "layer"
@@ -602,14 +602,15 @@ Charlifter.Lifter = function() {
                                     }
                                     result.span.parentNode.removeChild(
                                         result.span);
+                                    window.alert(response.span.innerHTML);
                                 } else { focused.innerHTML = response.text; }
                             }
-                            else if (selected) {
+                            else if (selected) { // Plain text + selected
                                 focused.value = result.begin + response.text
                                     + result.end;
                                 focused.setSelectionRange(result.stop
                                     , result.stop);
-                            } else { focused.value = response.text; }
+                            } else { focused.value = response.text; } // Plain
                             focused.focus();
                             break;
                         case codes.liftFailUnknown:
