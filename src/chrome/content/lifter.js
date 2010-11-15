@@ -238,7 +238,7 @@ Charlifter.Lifter = function() {
     let lastLang    = {lang: '', label: ''}
     let genRequest  = function(args, success, error, abort) {
         /* Abstracts API calling code */
-        let BASE_URL = "api.accentuate.us:8081/";
+        let BASE_URL = "api.accentuate.us:8080/";
         let url = "http://";
         if  ("undefined" == typeof(args['lang']) ||
             (args['call'] == 'charlifter.feedback')) {
@@ -602,7 +602,6 @@ Charlifter.Lifter = function() {
                                     }
                                     result.span.parentNode.removeChild(
                                         result.span);
-                                    //window.alert(response.span.innerHTML);
                                 } else { focused.innerHTML = response.text; }
                             }
                             else if (selected) { // Plain text + selected
