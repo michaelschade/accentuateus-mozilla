@@ -218,6 +218,23 @@ Charlifter.SQL = function() {
     }
 }();
 
+Charlifter.Chunk = function(elem, oldText, newText) {
+    return {
+        elem:   elem,
+        old:    oldText,
+        lifted: newText,
+        extract: function() {
+            /* Extract text from element + one context word on each side */
+            let re = RegExp('\\w*\\s*\\w*' + this..old +'\\w*\\s*\\w*', 'g');
+            this.old = re.exec(this.elem.value)[0];
+        },
+        update: function() {
+            /* Intelligently update element */
+            this.value = thi.elem.value.replace(this.old, this.lifted);
+        },
+    }
+};
+
 /* Handles user-interface and communication aspects for add-on */
 Charlifter.Lifter = function() {
     let codes = { // API Response Codes
@@ -527,19 +544,6 @@ Charlifter.Lifter = function() {
             setLastLang();
             return request;
         },
-        cancelLift : function(cid) {
-            /* Cancels indexed lift (slow network, etc.) */
-            pageElements[cid].abort();
-            pageElements[cid] = null;
-        },
-        cancelLiftSelection : function() {
-            /* Cancels lift for element */
-            let focused = getFocused();
-            try {
-                this.cancelLift(focused.getAttribute(cid));
-            } catch(err) { Charlifter.Util.log(err); }
-            focused.readOnly = false;
-        },
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
             let focused = getFocused();
@@ -633,6 +637,19 @@ Charlifter.Lifter = function() {
                 }, function(aAbort) {
                     focused.style.cursor = ocursor;
                 });
+        },
+        cancelLift : function(cid) {
+            /* Cancels indexed lift (slow network, etc.) */
+            pageElements[cid].abort();
+            pageElements[cid] = null;
+        },
+        cancelLiftSelection : function() {
+            /* Cancels lift for element */
+            let focused = getFocused();
+            try {
+                this.cancelLift(focused.getAttribute(cid));
+            } catch(err) { Charlifter.Util.log(err); }
+            focused.readOnly = false;
         },
         feedback : function(text, success, error, abort) {
             /* Submits feedback text for last used language */
