@@ -218,19 +218,20 @@ Charlifter.SQL = function() {
     }
 }();
 
-Charlifter.Chunk = function(elem, oldText, newText) {
+Charlifter.Chunk = function(elem) {
     return {
         elem:   elem,
-        old:    oldText,
-        lifted: newText,
+        buf:    '',
+        lifted: '',
+        timeout: null,
         extract: function() {
             /* Extract text from element + one context word on each side */
-            let re = RegExp('\\w*\\s*\\w*' + this..old +'\\w*\\s*\\w*', 'g');
-            this.old = re.exec(this.elem.value)[0];
+            let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
+            this.lifting = re.exec(this.elem.value)[0];
         },
         update: function() {
             /* Intelligently update element */
-            this.value = thi.elem.value.replace(this.old, this.lifted);
+            this.elem.value = this.elem.value.replace(this.lifting, this.lifted);
         },
     }
 };
@@ -250,7 +251,9 @@ Charlifter.Lifter = function() {
     let cprefs  = prefs.getBranch("extensions.accentuateus.languages.");
     let version = 'err';
     let cid     = "_-accentuateus-id"; // Charlifter attribute name
+    let punctuation = /[.!?,]/;
     let pageElements= {};
+    let chunks      = {};
     let strbundle   = null;
     let lastLang    = {lang: '', label: ''}
     let genRequest  = function(args, success, error, abort) {
@@ -637,6 +640,69 @@ Charlifter.Lifter = function() {
                 }, function(aAbort) {
                     focused.style.cursor = ocursor;
                 });
+        },
+        attach : function() {
+            let focused = getFocused();
+            if (!focused.hasAttribute(cid)) {
+                focused.setAttribute(cid, uuid());
+            }
+            let chunk = Charlifter.Chunk(focused);
+            chunks[focused.getAttribute(cid)] = chunk;
+            //chunk.timeout = setTimeout("", 500);
+            focused.addEventListener("keypress", function(evt) {
+                // If not an irrelevant modifier key
+                let chunk = chunks[this.getAttribute(cid)];
+                if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
+                    if (evt.which == 8) { // Backspace--remove last buffered character
+                        chunk.buf = chunk.buf.substring(0, chunk.buf.length-1);
+                    } else { // Add key to buffer
+                        let key = String.fromCharCode(evt.which);
+                        chunk.buf += key;
+                        if (punctuation.test(key)) { // Check for end-of-buffer signal
+                            //chunk.extract();
+                            //alert(chunk.lifting);
+                            //chunk.buf = '';
+                        }
+                    }
+                    clearTimeout(chunk.timeout);
+                    chunk.timeout = setTimeout(function() {
+                        chunk.extract();
+                        Charlifter.Lifter.lift('ht', chunk.lifting, function(aS) {
+                            let response = {};
+                            try {
+                                response = JSON.parse(aS.target.responseText);
+                            } catch(err) {
+                                Charlifter.Util.log(err);
+                                prompts.alert(window
+                                    , strbundle.getString("errors-title")
+                                    , strbundle.getString("errors-communication"));
+                            }
+                            try {
+                            switch (response.code) {
+                                case codes.liftSuccess:
+                                    chunk.lifted = response.text;
+                                    chunk.update();
+                                    break;
+                                case codes.liftFailUnknown:
+                                    prompts.alert(window
+                                        , strbundle.getString("errors-title")
+                                        , response.text);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            } catch(e) { alert(e); }
+                        }, function(aE) {
+                        }, function(aC) {
+                        });
+                        chunk.buf = '';
+                    }, 500);
+                }
+            }, false);
+            chunk.timeout = setTimeout(function() {
+                chunk.extract();
+                chunk.buf = '';
+            }, 500);
         },
         cancelLift : function(cid) {
             /* Cancels indexed lift (slow network, etc.) */

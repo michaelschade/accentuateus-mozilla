@@ -36,6 +36,11 @@
 
     <menupopup id           = "contentAreaContextMenu"
         >
+        <menuitem id        = "charlifter-cmenu-item-attach"
+            label           = "Attach"
+            oncommand       = "Charlifter.Lifter.attach();"
+            insertafter     = "context-viewinfo"
+        />
         <menuitem id        = "charlifter-cmenu-item-lift-feedback"
             label           = "&charlifter.citem.feedback.label;"
             accesskey       = "&charlifter.citem.feedback.accesskey;"
