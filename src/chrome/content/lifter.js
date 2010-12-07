@@ -125,6 +125,31 @@ Charlifter.Util = function() {
                 observer = new eobserver();
             }
         },
+        getFocused : function() {
+            let focused = document.commandDispatcher.focusedElement;
+            if(!focused) { // Get from other HTML element
+                focused = document.commandDispatcher
+                    .focusedWindow.document.activeElement;
+            }
+            return focused;
+        },
+        getSelection : function() {
+            /* Gets selected text either from standard element or iframe */
+            let selectedText = '';
+            let focused = this.getFocused();
+            try {
+                selectedText = focused.value.substring(
+                      focused.selectionStart
+                    , focused.selectionEnd
+                );
+            } catch(err) { // other HTML element
+                this.log(err);
+                focused = document.commandDispatcher
+                    .focusedWindow; // Selections are handled differently
+                selectedText = focused.getSelection().toString();
+            }
+            return selectedText;
+        },
     }
 }();
 
@@ -355,31 +380,6 @@ Charlifter.Lifter = function() {
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('" + lang + "')");
     };
-    let getFocused = function() {
-        let focused = document.commandDispatcher.focusedElement;
-        if(!focused) { // Get from other HTML element
-            focused = document.commandDispatcher
-                .focusedWindow.document.activeElement;
-        }
-        return focused;
-    };
-    let getSelection = function() {
-        /* Gets selected text either from standard element or iframe */
-        let selectedText = '';
-        let focused = getFocused();
-        try {
-            selectedText = focused.value.substring(
-                  focused.selectionStart
-                , focused.selectionEnd
-            );
-        } catch(err) { // other HTML element
-            Charlifter.Util.log(err);
-            focused = document.commandDispatcher
-                .focusedWindow; // Selections are handled differently
-            selectedText = focused.getSelection().toString();
-        }
-        return selectedText;
-    };
     let getLocale = function() {
         let locale = window.navigator.language;
         try {
@@ -476,16 +476,18 @@ Charlifter.Lifter = function() {
                 "charlifter-cmenu-item-lift-cancel");
             let liftFeedbackItem = document.getElementById(
                 "charlifter-cmenu-item-lift-feedback");
-            let focused = getFocused();
+            let focused = Charlifter.Util.getFocused();
             /*  Only display feedback item if
                 text is selected inside of text input */
             if (gContextMenu.onTextInput) {
-                if (getSelection() != "") { liftFeedbackItem.disabled = false; }
+                if (Charlifter.Util.getSelection() != "") {
+                    liftFeedbackItem.disabled = false;
+                }
                 else { liftFeedbackItem.disabled = true; }
             } else { liftFeedbackItem.disabled = true; }
             /* Label for accentuating all or just selected text */
             let liftProperty, langsMenuProperty;
-            if (!getSelection()) {
+            if (!Charlifter.Util.getSelection()) {
                 liftProperty = "lift-citem-label";
                 langsMenuProperty = "lift-cmenu-label";
             } else {
@@ -549,7 +551,7 @@ Charlifter.Lifter = function() {
         },
         liftSelection : function(lang) {
             /* Makes lift function specific to form element */
-            let focused = getFocused();
+            let focused = Charlifter.Util.getFocused();
             focused.readOnly = true;
             let ocursor = focused.style.cursor;
             let value   = focused.value;
@@ -560,7 +562,7 @@ Charlifter.Lifter = function() {
                 ihtml = true;
                 value = focused.innerHTML;
             }
-            if (getSelection() != '') { // Handling only highlighted text
+            if (Charlifter.Util.getSelection() != '') { // Handling only highlighted text
                 if (ihtml) { // rich text
                     let selection = document.commandDispatcher
                         .focusedWindow.getSelection().getRangeAt(0);
@@ -642,7 +644,7 @@ Charlifter.Lifter = function() {
                 });
         },
         attach : function() {
-            let focused = getFocused();
+            let focused = Charlifter.Util.getFocused();
             if (!focused.hasAttribute(cid)) {
                 focused.setAttribute(cid, uuid());
             }
@@ -711,7 +713,7 @@ Charlifter.Lifter = function() {
         },
         cancelLiftSelection : function() {
             /* Cancels lift for element */
-            let focused = getFocused();
+            let focused = Charlifter.Util.getFocused();
             try {
                 this.cancelLift(focused.getAttribute(cid));
             } catch(err) { Charlifter.Util.log(err); }
@@ -759,8 +761,8 @@ Charlifter.Lifter = function() {
             // They've done this before...
             else { result = 0; }
             if (result == 0) {
-                this.feedback(getSelection(), function(aSuccess) {
-                    }, function(aError) {}, function(aAbort) {}
+                this.feedback(Charlifter.Util.getSelection(), function(aS) {
+                    }, function(aE) {}, function(aC) {}
                 );
                 if (!cprefs.getBoolPref("feedback-success-hide")) {
                     let hide = {value: false};
