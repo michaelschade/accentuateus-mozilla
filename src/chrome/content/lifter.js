@@ -247,39 +247,39 @@ Charlifter.Chunk = function(elem) {
     let ihtml = false;
     let selected = false;
     let result = {};
-    let setText = function(text) {
-        /* Overrides entire text of the chunk element */
-        if (ihtml) {
-            if (selected) {
-                result.span.innerHTML = text;
-                // Remove our tracking "layer"
-                while (elem.span.firstChild) {
-                    elem.span.parentNode.insertBefore(
-                          elem.span.firstChild
-                        , elem.span
-                    );
-                }
-                elem.span.parentNode.removeChild(elem.span);
-                elem.value = result.begin + text + result.end;
-            } else { elem.innerHTML = text }
-        } else if (selected) {
-            elem.value = result.begin + text + result.end;
-            elem.setSelectionRange(result.stop, result.stop);
-        } else { elem.value = text }
-    };
-    let getText = function() {
-        /* Gets text of the entire chunk element */
-        if (ihtml) {
-            if (selected) { return result.span.innerHTML; }
-            else { return elem.innerHTML; }
-        } else if (selected) {
-            return elem.value.substring(elem.selectionStart, elem.selectionEnd);
-        } else { return elem.value; }
-    };
     return {
         http : null,
         buf  : '',
         timeout : null,
+        setText : function(text) {
+            /* Overrides entire text of the chunk element */
+            if (ihtml) {
+                if (selected) {
+                    result.span.innerHTML = text;
+                    // Remove our tracking "layer"
+                    while (elem.span.firstChild) {
+                        elem.span.parentNode.insertBefore(
+                              elem.span.firstChild
+                            , elem.span
+                        );
+                    }
+                    elem.span.parentNode.removeChild(elem.span);
+                    elem.value = result.begin + text + result.end;
+                } else { elem.innerHTML = text }
+            } else if (selected) {
+                elem.value = result.begin + text + result.end;
+                elem.setSelectionRange(result.stop, result.stop);
+            } else { elem.value = text }
+        },
+        getText : function() {
+            /* Gets text of the entire chunk element */
+            if (ihtml) {
+                if (selected) { return result.span.innerHTML; }
+                else { return elem.innerHTML; }
+            } else if (selected) {
+                return elem.value.substring(elem.selectionStart, elem.selectionEnd);
+            } else { return elem.value; }
+        },
         init : function() {
             // IHTML element?
             if (typeof(elem.value) == 'undefined') { ihtml = true; }
@@ -306,11 +306,11 @@ Charlifter.Chunk = function(elem) {
         extract: function() {
             /* Extract buffer + context words from overall text */
             let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
-            return re.exec(getText())[0];
+            return re.exec(this.getText())[0];
         },
         update: function(text) {
             /* Replace buffer text in element with supplied text */
-            setText(getText().replace(this.buf, text));
+            this.setText(this.getText().replace(this.buf, text));
         },
     }
 };
@@ -607,42 +607,15 @@ Charlifter.Lifter = function() {
             /* Makes lift function specific to form element */
             let focused = Charlifter.Util.getFocused();
             focused.readOnly = true;
+            let chunk = Charlifter.Chunk(focused);
+            chunk.init();
             let ocursor = focused.style.cursor;
-            let value   = focused.value;
-            let selected= false;
-            let ihtml   = false;
-            let result  = {};
-            if (typeof(value) == 'undefined') {
-                ihtml = true;
-                value = focused.innerHTML;
-            }
-            if (Charlifter.Util.getSelection() != '') { // Handling only highlighted text
-                if (ihtml) { // rich text
-                    let selection = document.commandDispatcher
-                        .focusedWindow.getSelection().getRangeAt(0);
-                    // Tracker "layer" to later update selection
-                    result.span = selection.startContainer.ownerDocument
-                        .createElement("layer");
-                    let docfrag = selection.extractContents();
-                    result.span.appendChild(docfrag);
-                    selection.insertNode(result.span);
-                    value = result.span.innerHTML;
-                } else { // other
-                    result.begin= focused.value.substring(0
-                        , focused.selectionStart);
-                    result.end  = focused.value.substring(focused.selectionEnd);
-                    result.stop = focused.selectionEnd;
-                    value = focused.value.substring(focused.selectionStart
-                        , focused.selectionEnd);
-                }
-                selected = true;
-            }
             focused.style.cursor = "wait";
             if (!focused.hasAttribute(cid)) {
                 focused.setAttribute(cid, uuid());
             }
             pageElements[focused.getAttribute(cid)]
-                = this.lift(lang, value, function(aSuccess) {
+                = this.lift(lang, chunk.getText(), function(aSuccess) {
                     let response = {};
                     try {
                         response = JSON.parse(aSuccess.target.responseText);
@@ -654,25 +627,7 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
-                            if (ihtml) { // Rich text
-                                if (selected) {
-                                    result.span.innerHTML = response.text;
-                                    // Remove our tracking "layer"
-                                    while (result.span.firstChild) {
-                                        result.span.parentNode.insertBefore(
-                                              result.span.firstChild
-                                            , result.span);
-                                    }
-                                    result.span.parentNode.removeChild(
-                                        result.span);
-                                } else { focused.innerHTML = response.text; }
-                            }
-                            else if (selected) { // Plain text + selected
-                                focused.value = result.begin + response.text
-                                    + result.end;
-                                focused.setSelectionRange(result.stop
-                                    , result.stop);
-                            } else { focused.value = response.text; } // Plain
+                            chunk.setText(response.text);
                             focused.focus();
                             break;
                         case codes.liftFailUnknown:
@@ -685,17 +640,18 @@ Charlifter.Lifter = function() {
                     }
                     focused.readOnly = false;
                     focused.style.cursor = ocursor;
-                    pageElements[focused.getAttribute(cid)] = null;
+                    delete pageElements[focused.getAttribute(cid)];
                 }, function(aError) {
                     focused.readOnly = false;
                     focused.style.cursor = ocursor;
-                    pageElements[focused.getAttribute(cid)] = null;
+                    delete pageElements[focused.getAttribute(cid)];
                     prompts.alert(window,
                           strbundle.getString("errors-title")
                         , strbundle.getString("errors-communication"));
                 }, function(aAbort) {
                     focused.style.cursor = ocursor;
-                });
+                }
+            );
         },
         attach : function() {
             let focused = Charlifter.Util.getFocused();
