@@ -251,7 +251,7 @@ Charlifter.Chunk = function(elem) {
         /* Overrides entire text of the chunk element */
         if (ihtml) {
             if (selected) {
-                elem.innerHTML = text;
+                result.span.innerHTML = text;
                 // Remove our tracking "layer"
                 while (elem.span.firstChild) {
                     elem.span.parentNode.insertBefore(
@@ -285,14 +285,14 @@ Charlifter.Chunk = function(elem) {
             if (typeof(elem.value) == 'undefined') { ihtml = true; }
             if (Charlifter.Util.getSelection() != '') {
                 if (ihtml) { // rich text
-                    let selection = elem.getSelection().getRangeAt(0);
+                    let selection = document.commandDispatcher
+                        .focusedWindow.getSelection().getRangeAt(0);
                     // Tracker "layer" to later update selection
                     result.span = selection.startContainer.ownerDocument
                         .createElement("layer");
                     let docfrag = selection.extractContents();
                     result.span.appendChild(docfrag);
                     selection.insertNode(result.span);
-                    //value = result.span.innerHTML;
                 } else { // other
                     result.begin= elem.value.substring(0, elem.selectionStart);
                     result.end  = elem.value.substring(elem.selectionEnd);
@@ -702,6 +702,8 @@ Charlifter.Lifter = function() {
                 focused.setAttribute(cid, uuid());
             }
             let chunk = Charlifter.Chunk(focused);
+            chunk.init();
+            /*
             chunks[focused.getAttribute(cid)] = chunk;
             //chunk.timeout = setTimeout("", 500);
             focused.addEventListener("keypress", function(evt) {
@@ -758,6 +760,7 @@ Charlifter.Lifter = function() {
                 chunk.extract();
                 chunk.buf = '';
             }, 500);
+            */
         },
         cancelLift : function(cid) {
             /* Cancels indexed lift (slow network, etc.) */
