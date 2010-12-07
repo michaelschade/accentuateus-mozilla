@@ -244,19 +244,72 @@ Charlifter.SQL = function() {
 }();
 
 Charlifter.Chunk = function(elem) {
+    let ihtml = false;
+    let selected = false;
+    let result = {};
+    let setText = function(text) {
+        /* Overrides entire text of the chunk element */
+        if (ihtml) {
+            if (selected) {
+                elem.innerHTML = text;
+                // Remove our tracking "layer"
+                while (elem.span.firstChild) {
+                    elem.span.parentNode.insertBefore(
+                          elem.span.firstChild
+                        , elem.span
+                    );
+                }
+                elem.span.parentNode.removeChild(elem.span);
+                elem.value = result.begin + text + result.end;
+            } else { elem.innerHTML = text }
+        } else if (selected) {
+            elem.value = result.begin + text + result.end;
+            elem.setSelectionRange(result.stop, result.stop);
+        } else { elem.value = text }
+    };
+    let getText = function() {
+        /* Gets text of the entire chunk element */
+        if (ihtml) {
+            if (selected) {
+            } else {
+            }
+        } else if (selected) {
+        } else { return elem.value; }
+        return '';
+    };
     return {
-        elem:   elem,
-        buf:    '',
-        lifted: '',
-        timeout: null,
-        extract: function() {
-            /* Extract text from element + one context word on each side */
-            let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
-            this.lifting = re.exec(this.elem.value)[0];
+        http : null,
+        buf  : '',
+        timeout : null,
+        init : function() {
+            if (typeof(elem.value) == 'undefined') { ihtml = true; }
+            if (Charlifter.Util.getSelection() != '') {
+                if (ihtml) { // rich text
+                    let selection = elem.getSelection().getRangeAt(0);
+                    // Tracker "layer" to later update selection
+                    result.span = selection.startContainer.ownerDocument
+                        .createElement("layer");
+                    let docfrag = selection.extractContents();
+                    result.span.appendChild(docfrag);
+                    selection.insertNode(result.span);
+                    //value = result.span.innerHTML;
+                } else { // other
+                    result.begin= elem.value.substring(0, elem.selectionStart);
+                    result.end  = elem.value.substring(elem.selectionEnd);
+                    result.stop = elem.selectionEnd;
+                    value = elem.value.substring(elem.selectionStart, elem.selectionEnd);
+                }
+                selected = true;
+            }
         },
-        update: function() {
-            /* Intelligently update element */
-            this.elem.value = this.elem.value.replace(this.lifting, this.lifted);
+        extract: function() {
+            /* Extract buffer + context words from overall text */
+            let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
+            return re.exec(getText())[0];
+        },
+        update: function(text) {
+            /* Replace buffer text in element with supplied text */
+            setText(getText().replace(this.buf, text));
         },
     }
 };
