@@ -270,19 +270,20 @@ Charlifter.Chunk = function(elem) {
     let getText = function() {
         /* Gets text of the entire chunk element */
         if (ihtml) {
-            if (selected) {
-            } else {
-            }
+            if (selected) { return result.span.innerHTML; }
+            else { return elem.innerHTML; }
         } else if (selected) {
+            return elem.value.substring(elem.selectionStart, elem.selectionEnd);
         } else { return elem.value; }
-        return '';
     };
     return {
         http : null,
         buf  : '',
         timeout : null,
         init : function() {
+            // IHTML element?
             if (typeof(elem.value) == 'undefined') { ihtml = true; }
+            // Selection element?
             if (Charlifter.Util.getSelection() != '') {
                 if (ihtml) { // rich text
                     let selection = document.commandDispatcher
