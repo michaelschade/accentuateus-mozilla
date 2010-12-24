@@ -308,9 +308,9 @@ Charlifter.Chunk = function(elem) {
             let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
             return re.exec(this.getText())[0];
         },
-        update: function(text) {
+        update: function(search, replace) {
             /* Replace buffer text in element with supplied text */
-            this.setText(this.getText().replace(this.buf, text));
+            this.setText(this.getText().replace(search, replace));
         },
     }
 };
@@ -653,19 +653,63 @@ Charlifter.Lifter = function() {
                 }
             );
         },
-        attach : function() {
-            let focused = Charlifter.Util.getFocused();
-            if (!focused.hasAttribute(cid)) {
-                focused.setAttribute(cid, uuid());
+        attach : function(doc) {
+            try {
+                if (doc == null) { doc = content.document; }
+                // TODO: Clean this. This is messily verbose for debug.
+                let inputs = doc.getElementsByTagName("input");
+                for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+                inputs = doc.getElementsByTagName("textarea");
+                for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+                inputs = doc.getElementsByTagName("iframe");
+                for (let i=0; i<inputs.length; i++) {
+                    this.attach(inputs[i].contentWindow.document);
+                }
+            } catch(e) { alert(e); }
+        },
+        attache : function(elem) {
+            if (!elem.hasAttribute(cid)) {
+                elem.setAttribute(cid, uuid());
             }
-            let chunk = Charlifter.Chunk(focused);
+            let chunk = Charlifter.Chunk(elem);
             chunk.init();
-            /*
-            chunks[focused.getAttribute(cid)] = chunk;
-            //chunk.timeout = setTimeout("", 500);
-            focused.addEventListener("keypress", function(evt) {
+            chunks[elem.getAttribute(cid)] = chunk;
+            let dispatch = function() {
+                //alert("Dispatched with buffer " + chunk.buf);
+                //alert("Extracting " + chunk.extract());
+                let text = chunk.extract();
+                chunk.buf = '';
+                Charlifter.Lifter.lift('ht', text, function(aS) {
+                    let response = {};
+                    try {
+                        response = JSON.parse(aS.target.responseText);
+                    } catch(err) {
+                        Charlifter.Util.log(err);
+                        prompts.alert(window
+                            , strbundle.getString("errors-title")
+                            , strbundle.getString("errors-communication"));
+                    }
+                    try {
+                    switch (response.code) {
+                        case codes.liftSuccess:
+                            //alert("Updating with " + response.text);
+                            chunk.update(text, response.text);
+                            break;
+                        case codes.liftFailUnknown:
+                            prompts.alert(window
+                                , strbundle.getString("errors-title")
+                                , response.text);
+                            break;
+                        default:
+                            break;
+                    }
+                    } catch(e) { alert(e); }
+                }, function(aE) {
+                }, function(aC) {
+                });
+            };
+            elem.addEventListener("keypress", function(evt) {
                 // If not an irrelevant modifier key
-                let chunk = chunks[this.getAttribute(cid)];
                 if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
                     if (evt.which == 8) { // Backspace--remove last buffered character
                         chunk.buf = chunk.buf.substring(0, chunk.buf.length-1);
@@ -673,51 +717,13 @@ Charlifter.Lifter = function() {
                         let key = String.fromCharCode(evt.which);
                         chunk.buf += key;
                         if (punctuation.test(key)) { // Check for end-of-buffer signal
-                            //chunk.extract();
-                            //alert(chunk.lifting);
-                            //chunk.buf = '';
+                            dispatch();
                         }
+                        clearTimeout(chunk.timeout);
+                        chunk.timeout = setTimeout(dispatch, 500);
                     }
-                    clearTimeout(chunk.timeout);
-                    chunk.timeout = setTimeout(function() {
-                        chunk.extract();
-                        Charlifter.Lifter.lift('ht', chunk.lifting, function(aS) {
-                            let response = {};
-                            try {
-                                response = JSON.parse(aS.target.responseText);
-                            } catch(err) {
-                                Charlifter.Util.log(err);
-                                prompts.alert(window
-                                    , strbundle.getString("errors-title")
-                                    , strbundle.getString("errors-communication"));
-                            }
-                            try {
-                            switch (response.code) {
-                                case codes.liftSuccess:
-                                    chunk.lifted = response.text;
-                                    chunk.update();
-                                    break;
-                                case codes.liftFailUnknown:
-                                    prompts.alert(window
-                                        , strbundle.getString("errors-title")
-                                        , response.text);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            } catch(e) { alert(e); }
-                        }, function(aE) {
-                        }, function(aC) {
-                        });
-                        chunk.buf = '';
-                    }, 500);
                 }
             }, false);
-            chunk.timeout = setTimeout(function() {
-                chunk.extract();
-                chunk.buf = '';
-            }, 500);
-            */
         },
         cancelLift : function(cid) {
             /* Cancels indexed lift (slow network, etc.) */

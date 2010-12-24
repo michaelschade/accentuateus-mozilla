@@ -38,7 +38,7 @@
         >
         <menuitem id        = "charlifter-cmenu-item-attach"
             label           = "Attach"
-            oncommand       = "Charlifter.Lifter.attach();"
+            oncommand       = "Charlifter.Lifter.attach(null);"
             insertafter     = "context-viewinfo"
         />
         <menuitem id        = "charlifter-cmenu-item-lift-feedback"
