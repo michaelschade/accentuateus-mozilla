@@ -680,7 +680,11 @@ Charlifter.Lifter = function() {
             if (doc == null) { doc = content.document; }
             // TODO: Clean this. This is messily verbose for debug.
             let inputs = doc.getElementsByTagName("input");
-            for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+            for (let i=0; i<inputs.length; i++) {
+                let elem = inputs[i];
+                if (elem.getAttribute("type").toLowerCase() != "password")
+                    this.attache(inputs[i]);
+            }
             inputs = doc.getElementsByTagName("textarea");
             for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
             inputs = doc.getElementsByTagName("iframe");
