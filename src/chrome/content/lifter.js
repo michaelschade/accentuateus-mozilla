@@ -472,6 +472,25 @@ Charlifter.Lifter = function() {
                     setLastLang();
                 },
             });
+            this.liveOn();
+        },
+        liveOn : function() {
+            gBrowser.addEventListener("load", function(evt) {
+                // this is the content document of the loaded page.
+                let doc = evt.originalTarget;
+                if (doc instanceof HTMLDocument) {
+                    // is this an inner frame?
+                    if (doc.defaultView.frameElement) {
+                        // Frame within a tab was loaded. Find the root document:
+                        while (doc.defaultView.frameElement) {
+                            doc = doc.defaultView.frameElement.ownerDocument;
+                        }
+                    }
+                }
+                Charlifter.Lifter.attach(doc);
+            }, true);
+        },
+        liveOff : function() {
         },
         populateLangTable : function() {
             /* Populates language table with new list */
@@ -679,7 +698,7 @@ Charlifter.Lifter = function() {
             let dispatch = function() {
                 let text = chunk.extract();
                 chunk.buf = '';
-                Charlifter.Lifter.lift('ht', text, function(aS) {
+                Charlifter.Lifter.lift('ga', text, function(aS) {
                     let response = {};
                     try {
                         response = JSON.parse(aS.target.responseText);
