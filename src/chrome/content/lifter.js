@@ -269,7 +269,11 @@ Charlifter.Chunk = function(elem) {
             } else if (selected) {
                 elem.value = result.begin + text + result.end;
                 elem.setSelectionRange(result.stop, result.stop);
-            } else { elem.value = text }
+            } else {
+                let pos = elem.selectionStart;
+                elem.value = text
+                elem.setSelectionRange(pos, pos);
+            }
         },
         getText : function() {
             /* Gets text of the entire chunk element */
@@ -654,18 +658,16 @@ Charlifter.Lifter = function() {
             );
         },
         attach : function(doc) {
-            try {
-                if (doc == null) { doc = content.document; }
-                // TODO: Clean this. This is messily verbose for debug.
-                let inputs = doc.getElementsByTagName("input");
-                for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
-                inputs = doc.getElementsByTagName("textarea");
-                for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
-                inputs = doc.getElementsByTagName("iframe");
-                for (let i=0; i<inputs.length; i++) {
-                    this.attach(inputs[i].contentWindow.document);
-                }
-            } catch(e) { alert(e); }
+            if (doc == null) { doc = content.document; }
+            // TODO: Clean this. This is messily verbose for debug.
+            let inputs = doc.getElementsByTagName("input");
+            for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+            inputs = doc.getElementsByTagName("textarea");
+            for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+            inputs = doc.getElementsByTagName("iframe");
+            for (let i=0; i<inputs.length; i++) {
+                this.attach(inputs[i].contentWindow.document);
+            }
         },
         attache : function(elem) {
             if (!elem.hasAttribute(cid)) {
@@ -675,8 +677,6 @@ Charlifter.Lifter = function() {
             chunk.init();
             chunks[elem.getAttribute(cid)] = chunk;
             let dispatch = function() {
-                //alert("Dispatched with buffer " + chunk.buf);
-                //alert("Extracting " + chunk.extract());
                 let text = chunk.extract();
                 chunk.buf = '';
                 Charlifter.Lifter.lift('ht', text, function(aS) {
@@ -689,10 +689,8 @@ Charlifter.Lifter = function() {
                             , strbundle.getString("errors-title")
                             , strbundle.getString("errors-communication"));
                     }
-                    try {
                     switch (response.code) {
                         case codes.liftSuccess:
-                            //alert("Updating with " + response.text);
                             chunk.update(text, response.text);
                             break;
                         case codes.liftFailUnknown:
@@ -703,7 +701,6 @@ Charlifter.Lifter = function() {
                         default:
                             break;
                     }
-                    } catch(e) { alert(e); }
                 }, function(aE) {
                 }, function(aC) {
                 });

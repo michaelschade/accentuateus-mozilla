@@ -11,7 +11,7 @@
                    em:name="Accentuate.us"
                    em:description="Accentuate.us allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard."
                    em:version="1.0b1"
-                   em:creator="Spearhead Development, L.L.C. (http://www.spearheaddev.com/)"
+                   em:creator="Spearhead Development, L.L.C. (http://spearheaddev.com/)"
                    em:homepageURL="http://accentuate.us/"
                    em:type="2"
                    em:aboutURL="chrome://accentuateus/content/about.xul">
