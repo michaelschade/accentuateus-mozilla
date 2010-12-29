@@ -678,7 +678,6 @@ Charlifter.Lifter = function() {
         },
         attach : function(doc) {
             if (doc == null) { doc = content.document; }
-            // TODO: Clean this. This is messily verbose for debug.
             let inputs = doc.getElementsByTagName("input");
             for (let i=0; i<inputs.length; i++) {
                 let elem = inputs[i];
