@@ -681,8 +681,11 @@ Charlifter.Lifter = function() {
             let inputs = doc.getElementsByTagName("input");
             for (let i=0; i<inputs.length; i++) {
                 let elem = inputs[i];
-                if (elem.getAttribute("type").toLowerCase() != "password")
-                    this.attache(inputs[i]);
+                if (elem.hasAttribute("type")) {
+                    if (elem.getAttribute("type").toLowerCase() == "text") {
+                        this.attache(elem);
+                    }
+                } else { this.attache(elem); }
             }
             inputs = doc.getElementsByTagName("textarea");
             for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
@@ -701,7 +704,7 @@ Charlifter.Lifter = function() {
             let dispatch = function() {
                 let text = chunk.extract();
                 chunk.buf = '';
-                Charlifter.Lifter.lift('ga', text, function(aS) {
+                Charlifter.Lifter.lift('ht', text, function(aS) {
                     let response = {};
                     try {
                         response = JSON.parse(aS.target.responseText);
