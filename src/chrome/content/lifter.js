@@ -309,7 +309,9 @@ Charlifter.Chunk = function(elem) {
         },
         extract: function() {
             /* Extract buffer + context words from overall text */
-            let re = RegExp('\\w*\\s*\\w*' + this.buf +'\\w*\\s*\\w*', 'g');
+            let word  = '([\\x{200C}\\x{200D}]|\\p{L}|\\p{M})*';
+            let space = '\\s*';
+            let re = XRegExp(word + space + word + this.buf + word + space + word, 'g');
             return re.exec(this.getText())[0];
         },
         update: function(search, replace) {
@@ -704,7 +706,7 @@ Charlifter.Lifter = function() {
             let dispatch = function() {
                 let text = chunk.extract();
                 chunk.buf = '';
-                Charlifter.Lifter.lift('ht', text, function(aS) {
+                Charlifter.Lifter.lift('ga', text, function(aS) {
                     let response = {};
                     try {
                         response = JSON.parse(aS.target.responseText);

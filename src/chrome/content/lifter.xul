@@ -23,19 +23,17 @@
 
 <!DOCTYPE overlay SYSTEM "chrome://accentuateus/locale/lifter.dtd">
 
-<overlay id     = "charlifter-browser-overlay"
-        xmlns   = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id = "charlifter-browser-overlay" xmlns = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type = "application/x-javascript" src = "chrome://accentuateus/content/xregexp.js" />
+    <script type = "application/x-javascript" src = "chrome://accentuateus/content/xregexp-unicode-base.js" />
+    <script type = "application/x-javascript" src = "chrome://accentuateus/content/xregexp-unicode-categories.js" />
+    <script type = "application/x-javascript" src = "chrome://accentuateus/content/lifter.js" />
 
-    <script type    = "application/x-javascript"
-        src         = "chrome://accentuateus/content/lifter.js" />
-
-    <stringbundleset id     = "stringbundleset">
-        <stringbundle id    = "charlifter-string-bundle"
-            src             = "chrome://accentuateus/locale/lifter.properties" />
+    <stringbundleset id = "stringbundleset">
+        <stringbundle id = "charlifter-string-bundle" src = "chrome://accentuateus/locale/lifter.properties" />
     </stringbundleset>
 
-    <menupopup id           = "contentAreaContextMenu"
-        >
+    <menupopup id = "contentAreaContextMenu">
         <menuitem id        = "charlifter-cmenu-item-lift-feedback"
             label           = "&charlifter.citem.feedback.label;"
             accesskey       = "&charlifter.citem.feedback.accesskey;"
