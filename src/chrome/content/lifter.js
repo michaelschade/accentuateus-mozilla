@@ -309,7 +309,7 @@ Charlifter.Chunk = function(elem) {
         },
         extract: function() {
             /* Extract buffer + context words from overall text */
-            let word  = '([\\x{200C}\\x{200D}]|\\p{L}|\\p{M})*';
+            let word  = '([\\x{200C}\\x{200D}´\'’-]|\\p{L}|\\p{M})*';
             let space = '\\s*';
             let re = XRegExp(word + space + word + this.buf + word + space + word, 'g');
             return re.exec(this.getText())[0];
