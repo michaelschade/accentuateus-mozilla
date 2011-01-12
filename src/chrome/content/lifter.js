@@ -275,12 +275,13 @@ Charlifter.Chunk = function(elem) {
                 elem.setSelectionRange(pos, pos);
             }
         },
-        getText : function() {
+        getText : function(all) {
             /* Gets text of the entire chunk element */
+            if ("undefined" == typeof(all)) { all = false; }
             if (ihtml) {
                 if (selected) { return result.span.innerHTML; }
                 else { return elem.innerHTML; }
-            } else if (selected) {
+            } else if (selected && !all) {
                 return elem.value.substring(elem.selectionStart, elem.selectionEnd);
             } else { return elem.value; }
         },
@@ -306,17 +307,18 @@ Charlifter.Chunk = function(elem) {
                 }
                 selected = true;
             }
+            return this;
         },
-        extract: function() {
+        extract: function(all) {
             /* Extract buffer + context words from overall text */
             let word  = '([\\x{200C}\\x{200D}´\'’-]|\\p{L}|\\p{M})*';
             let space = '\\s*';
             let re = XRegExp(word + space + word + this.buf + word + space + word, 'g');
-            return re.exec(this.getText())[0];
+            return re.exec(this.getText(all))[0];
         },
-        update: function(search, replace) {
+        update: function(search, replace, all) {
             /* Replace buffer text in element with supplied text */
-            this.setText(this.getText().replace(search, replace));
+            this.setText(this.getText(all).replace(search, replace));
         },
     }
 };
@@ -797,14 +799,16 @@ Charlifter.Lifter = function() {
                         );
                         break;
                     case 2: // Cancel
-                    default:
-                        break;
+                    default: break;
                 }
             }
             // They've done this before...
             else { result = 0; }
             if (result == 0) {
-                this.feedback(Charlifter.Util.getSelection(), function(aS) {
+                let focused = Charlifter.Util.getFocused();
+                let chunk = Charlifter.Chunk(focused).init();
+                chunk.buf = chunk.getText();
+                this.feedback(chunk.extract(true), function(aS) {
                     }, function(aE) {}, function(aC) {}
                 );
                 if (!cprefs.getBoolPref("feedback-success-hide")) {
