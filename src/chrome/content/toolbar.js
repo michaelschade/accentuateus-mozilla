@@ -25,10 +25,12 @@ Charlifter.Toolbar = function() {
     let btn = null;
     let on  = false;
     return {
+        /* Initialize toolbar entry for live accentuation. */
         init : function() {
             btn = window.document.getElementById("accentuateus-live-button");
             this.disable();
         },
+        /* Enable live accentuation. */
         enable : function() {
             try {
                 Charlifter.Lifter.liveOn();
@@ -38,6 +40,7 @@ Charlifter.Toolbar = function() {
             btn.setAttribute("tooltiptext", "Accentuate.us: Click to disable live accentuation");
             btn.setAttribute("oncommand", "Charlifter.Toolbar.disable();");
         },
+        /* Disable live accentuation. */
         disable : function() {
             Charlifter.Lifter.liveOff();
             on = false;
@@ -45,6 +48,7 @@ Charlifter.Toolbar = function() {
             btn.setAttribute("tooltiptext", "Accentuate.us: Click to enable live accentuation");
             btn.setAttribute("oncommand", "Charlifter.Toolbar.enable();");
         },
+        /* Toggle live accentuation on and off. */
         toggle : function() {
             if (on == true) {
                 this.disable();
