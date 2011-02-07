@@ -6,7 +6,7 @@
     <script type="application/x-javascript" src="chrome://accentuateus/content/lifter.js"/>
     <script type="application/x-javascript" src="chrome://accentuateus/content/toolbar.js"/>
     <keyset>
-        <key id="accentuateus-live-toggle" modifiers="meta shift" key="A" oncommand="Charlifter.Toolbar.toggle();"/>
+        <key id="accentuateus-live-toggle" modifiers="accel shift" key="A" oncommand="Charlifter.Toolbar.toggle();"/>
     </keyset>
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton
