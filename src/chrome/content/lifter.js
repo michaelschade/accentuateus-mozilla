@@ -341,6 +341,7 @@ Charlifter.Lifter = function() {
     let punctuation = /[.!?,]/;
     let pageElements= {};
     let chunks      = {};
+    let livefns     = {};
     let strbundle   = null;
     let lastLang    = {lang: '', label: ''}
     let genRequest  = function(args, success, error, abort) {
@@ -450,6 +451,20 @@ Charlifter.Lifter = function() {
         } catch(err) { Charlifter.Util.log(err); }
         return locale;
     };
+    let browserLive = function(evt) {
+        // this is the content document of the loaded page.
+        let doc = evt.originalTarget;
+        if (doc instanceof HTMLDocument) {
+            // is this an inner frame?
+            if (doc.defaultView.frameElement) {
+                // Frame within a tab was loaded. Find the root document
+                while (doc.defaultView.frameElement) {
+                    doc = doc.defaultView.frameElement.ownerDocument;
+                }
+            }
+        }
+        Charlifter.Lifter.attach(doc);
+    };
     return {
         init : function(ver) {
             /* Initializes Lifter */
@@ -476,25 +491,22 @@ Charlifter.Lifter = function() {
                     setLastLang();
                 },
             });
-            this.liveOn();
         },
         liveOn : function() {
-            gBrowser.addEventListener("load", function(evt) {
-                // this is the content document of the loaded page.
-                let doc = evt.originalTarget;
-                if (doc instanceof HTMLDocument) {
-                    // is this an inner frame?
-                    if (doc.defaultView.frameElement) {
-                        // Frame within a tab was loaded. Find the root document:
-                        while (doc.defaultView.frameElement) {
-                            doc = doc.defaultView.frameElement.ownerDocument;
-                        }
-                    }
-                }
-                Charlifter.Lifter.attach(doc);
-            }, true);
+            let num = gBrowser.browsers.length;
+            for (let i = 0; i < num; i++) {
+                let b = gBrowser.getBrowserAtIndex(i);
+                Charlifter.Lifter.attach(b.contentDocument);
+            }
+            gBrowser.addEventListener("load", browserLive, true);
         },
         liveOff : function() {
+            let num = gBrowser.browsers.length;
+            for (let i = 0; i < num; i++) {
+                let b = gBrowser.getBrowserAtIndex(i);
+                Charlifter.Lifter.detach(b.contentDocument);
+            }
+            gBrowser.removeEventListener("load", browserLive, true);
         },
         populateLangTable : function() {
             /* Populates language table with new list */
@@ -704,7 +716,8 @@ Charlifter.Lifter = function() {
             }
             let chunk = Charlifter.Chunk(elem);
             chunk.init();
-            chunks[elem.getAttribute(cid)] = chunk;
+            let c = elem.getAttribute(cid);
+            chunks[c] = chunk;
             let dispatch = function() {
                 let text = chunk.extract();
                 chunk.buf = '';
@@ -734,7 +747,7 @@ Charlifter.Lifter = function() {
                 }, function(aC) {
                 });
             };
-            elem.addEventListener("keypress", function(evt) {
+            let lifter = function(evt) {
                 // If not an irrelevant modifier key
                 if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
                     if (evt.which == 8) { // Backspace--remove last buffered character
@@ -749,7 +762,35 @@ Charlifter.Lifter = function() {
                         chunk.timeout = setTimeout(dispatch, 500);
                     }
                 }
-            }, false);
+            };
+            livefns[c] = lifter;
+            elem.addEventListener("keypress", lifter, false);
+        },
+        detach : function(doc) {
+            if (doc == null) { doc = content.document; }
+            let inputs = doc.getElementsByTagName("input");
+            for (let i=0; i<inputs.length; i++) {
+                let elem = inputs[i];
+                if (elem.hasAttribute("type")) {
+                    if (elem.getAttribute("type").toLowerCase() == "text") {
+                        this.detache(elem);
+                    }
+                } else { this.detache(elem); }
+            }
+            inputs = doc.getElementsByTagName("textarea");
+            for (let i=0; i<inputs.length; i++) { this.detache(inputs[i]); }
+            inputs = doc.getElementsByTagName("iframe");
+            for (let i=0; i<inputs.length; i++) {
+                this.detach(inputs[i].contentWindow.document);
+            }
+        },
+        detache : function(elem) {
+            if (elem.hasAttribute(cid)) {
+                let c = elem.getAttribute(cid);
+                elem.removeEventListener("keypress", livefns[c], false);
+                delete chunks[c];
+                delete livefns[c];
+            }
         },
         cancelLift : function(cid) {
             /* Cancels indexed lift (slow network, etc.) */

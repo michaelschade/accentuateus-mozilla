@@ -114,3 +114,7 @@ locale  accentuateus  zh-TW    jar:chrome/accentuateus.jar!/locale/zh-TW/
 locale  accentuateus  zu    jar:chrome/accentuateus.jar!/locale/zu/
 
 overlay chrome://browser/content/browser.xul chrome://accentuateus/content/lifter.xul
+overlay chrome://browser/content/browser.xul chrome://accentuateus/content/toolbar.xul
+
+skin    accentuateus classic/1.0 jar:chrome/accentuateus.jar!/skin/
+style   chrome://global/content/customizeToolbar.xul chrome://accentuateus/skin/toolbar.css

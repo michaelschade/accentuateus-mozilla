@@ -19,7 +19,7 @@
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<?xml-stylesheet type="text/css" href="chrome://global/skin/" ?>
+<?xml-stylesheet type="text/css" href="chrome://global/skin/"?>
 
 <!DOCTYPE overlay SYSTEM "chrome://accentuateus/locale/lifter.dtd">
 

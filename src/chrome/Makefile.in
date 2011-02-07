@@ -11,9 +11,10 @@ jar_source_root := chrome
 jar_sources := $(wildcard $(jar_source_root)/content/*.js) \
                $(wildcard $(jar_source_root)/content/*.xul) \
                $(wildcard $(jar_source_root)/content/*.xml) \
-               $(wildcard $(jar_source_root)/content/*.css) \
                $(wildcard $(jar_source_root)/locale/*/*.dtd) \
-               $(wildcard $(jar_source_root)/locale/*/*.properties)
+               $(wildcard $(jar_source_root)/locale/*/*.properties) \
+               $(wildcard $(jar_source_root)/skin/*.png) \
+               $(wildcard $(jar_source_root)/skin/*.css)
 
 jar_sources_no_dir := $(subst $(jar_source_root)/,,$(jar_sources))
 

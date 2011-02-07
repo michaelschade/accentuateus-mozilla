@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/css" href="chrome://accentuateus/skin/toolbar.css"?>
+
+<overlay id="accentuateusToolbar" xmlns:html="http://www.w3.org/1999/xhtml" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <script type="application/x-javascript" src="chrome://accentuateus/content/lifter.js"/>
+    <script type="application/x-javascript" src="chrome://accentuateus/content/toolbar.js"/>
+    <keyset>
+        <key id="accentuateus-live-toggle" modifiers="meta shift" key="A" oncommand="Charlifter.Toolbar.toggle();"/>
+    </keyset>
+    <toolbarpalette id="BrowserToolbarPalette">
+        <toolbarbutton
+            id          = "accentuateus-live-button"
+            class       = "toolbarbutton-1"
+        />
+    </toolbarpalette>
+</overlay>
