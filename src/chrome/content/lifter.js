@@ -721,7 +721,7 @@ Charlifter.Lifter = function() {
             let dispatch = function() {
                 let text = chunk.extract();
                 chunk.buf = '';
-                Charlifter.Lifter.lift('ga', text, function(aS) {
+                Charlifter.Lifter.lift(lastLang.lang, text, function(aS) {
                     let response = {};
                     try {
                         response = JSON.parse(aS.target.responseText);
