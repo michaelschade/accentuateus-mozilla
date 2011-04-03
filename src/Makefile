@@ -45,6 +45,9 @@ install_rdf := install.rdf
 # The chrome.manifest file.
 chrome_manifest := chrome.manifest
 
+# The chrome directory
+chrome_dir := chrome
+
 # This builds the extension XPI file.
 .PHONY: all
 all: $(xpi_file)
@@ -59,16 +62,12 @@ clean:
 	@rm -f $(xpi_file)
 	@echo "Cleanup is done."
 
-# The includes are added after the targets because we want this file to contain
-# the default (first) target.
-include chrome/Makefile.in
-
 # The sources for the XPI file.  Uses variables defined in the included
 # Makefiles.
 xpi_built := $(build_dir)/$(install_rdf) \
              $(build_dir)/$(chrome_manifest) \
              $(build_dir)/$(icon) \
-             $(chrome_jar_file)
+             $(build_dir)/$(chrome_dir)
 
 xpi_built_no_dir := $(subst $(build_dir)/,,$(xpi_built))
 
@@ -91,7 +90,7 @@ $(xpi_file): $(build_dir) $(xpi_built)
 	@echo "Creating XPI file. Done!"
 
 $(build_dir)/%: %
-	@cp -f $< $@
+	@cp -Rf $< $@
 
 $(build_dir):
 	@if [ ! -x $(build_dir) ]; \
