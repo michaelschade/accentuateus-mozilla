@@ -244,9 +244,30 @@ Charlifter.SQL = function() {
 }();
 
 Charlifter.Chunk = function(elem) {
-    let ihtml = false;
+    let ihtml    = false;
     let selected = false;
-    let result = {};
+    let result   = {};
+    let punctuation = '[.!?,]*';
+    let word     = '([\\x{200C}\\x{200D}´\'’-]|\\p{L}|\\p{M})*';
+    let space    = '\\s*';
+    let context  = word + space + word + space + word;
+    let strip = function(expr, text) {
+        /* Intelligently strips that which a regex finds in a text. */
+        let re = XRegExp(expr);
+        let rslt = text.replace(re.exec(text)[0], '');
+        if (rslt.length == 0) {
+            return text;
+        } else { return rslt; }
+    };
+    let stripFstWord = function(text) {
+        /* Remove first word */
+        return strip('^' + space + word + space, text);
+    };
+    let stripLstWord = function(text) {
+        /* Remove last word */
+        return strip(space + word + '(' + punctuation + '|'
+               + space + ')$', text);
+    };
     return {
         http : null,
         buf  : '',
@@ -311,13 +332,25 @@ Charlifter.Chunk = function(elem) {
         },
         extract: function(all) {
             /* Extract buffer + context words from overall text */
-            let word  = '([\\x{200C}\\x{200D}´\'’-]|\\p{L}|\\p{M})*';
-            let space = '\\s*';
-            let re = XRegExp(word + space + word + this.buf + word + space + word, 'g');
+            let re = XRegExp(context + this.buf + context, 'g');
             return re.exec(this.getText(all))[0];
         },
         update: function(search, replace, all) {
             /* Replace buffer text in element with supplied text */
+            let allText = this.getText(true);
+            let beginOfInput = allText.match('^' + search) != null,
+                endOfInput   = allText.match(search + '$') != null;
+            if (beginOfInput && endOfInput) { // Full text, keep context
+            } else if (beginOfInput) { // Strictly at beginning, no end context
+                search  = stripLstWord(search);
+                replace = stripLstWord(replace);
+            } else if (endOfInput) { // Strictly at end, no beginning context
+                search  = stripFstWord(search);
+                replace = stripFstWord(replace);
+            } else { // In the middle, no context at all
+                search  = stripFstWord(stripLstWord(search));
+                replace = stripFstWord(stripLstWord(replace));
+            }
             this.setText(this.getText(all).replace(search, replace));
         },
     }
@@ -338,7 +371,6 @@ Charlifter.Lifter = function() {
     let cprefs  = prefs.getBranch("extensions.accentuateus.languages.");
     let version = 'err';
     let cid     = "_-accentuateus-id"; // Charlifter attribute name
-    let punctuation = /[.!?,]/;
     let pageElements= {};
     let chunks      = {};
     let livefns     = {};
@@ -694,17 +726,43 @@ Charlifter.Lifter = function() {
         },
         attach : function(doc) {
             if (doc == null) { doc = content.document; }
+            // Attach live lifter to input
+            let _attachInput = function(elem) {
+                if (elem.hasAttribute("type")) {
+                    if (elem.getAttribute("type").toLowerCase() == "text") {
+                        Charlifter.Lifter.attache(elem);
+                    }
+                } else { Charlifter.Lifter.attache(elem); }
+            };
+            // Attach to inserted DOM nodes if of proper text type
+            doc.addEventListener('DOMNodeInserted', function(evt) {
+                let tn = evt.target.tagName.toLowerCase();
+                switch(tn) {
+                    case 'input':
+                        //this.attache(evt.target);
+                        break;
+                    case 'textarea':
+                        //this.attache(evt.target);
+                        break;
+                    case 'iframe':
+                        //alert('Gotcha.');
+                        try {
+                        this.attach(evt.target.contentWindow.document);
+                        } catch(e) { }//alert(e); }
+                        break;
+                    default: break;
+                }
+            }, false);
+            // Attach to all inputs
             let inputs = doc.getElementsByTagName("input");
             for (let i=0; i<inputs.length; i++) {
                 let elem = inputs[i];
-                if (elem.hasAttribute("type")) {
-                    if (elem.getAttribute("type").toLowerCase() == "text") {
-                        this.attache(elem);
-                    }
-                } else { this.attache(elem); }
+                _attachInput(elem);
             }
+            // Attach to all textareas
             inputs = doc.getElementsByTagName("textarea");
             for (let i=0; i<inputs.length; i++) { this.attache(inputs[i]); }
+            // Recursively attach to contents of all iframes
             inputs = doc.getElementsByTagName("iframe");
             for (let i=0; i<inputs.length; i++) {
                 this.attach(inputs[i].contentWindow.document);
@@ -733,6 +791,8 @@ Charlifter.Lifter = function() {
                     }
                     switch (response.code) {
                         case codes.liftSuccess:
+                            //alert(text);
+                            //alert(response.text);
                             chunk.update(text, response.text);
                             break;
                         case codes.liftFailUnknown:
@@ -755,9 +815,6 @@ Charlifter.Lifter = function() {
                     } else { // Add key to buffer
                         let key = String.fromCharCode(evt.which);
                         chunk.buf += key;
-                        if (punctuation.test(key)) { // Check for end-of-buffer signal
-                            dispatch();
-                        }
                         clearTimeout(chunk.timeout);
                         chunk.timeout = setTimeout(dispatch, 500);
                     }
