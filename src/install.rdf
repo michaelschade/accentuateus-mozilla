@@ -5,7 +5,7 @@
   <RDF:Description RDF:about="rdf:#$v5LjR"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="3.5"
-                   em:maxVersion="4.0b8" />
+                   em:maxVersion="4.0" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="addons-mozilla@accentuate.us"
                    em:name="Accentuate.us"
