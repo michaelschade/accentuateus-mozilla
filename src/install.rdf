@@ -5,12 +5,12 @@
   <RDF:Description RDF:about="rdf:#$v5LjR"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="3.5"
-                   em:maxVersion="4.0" />
+                   em:maxVersion="5.*" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="addons-mozilla@accentuate.us"
                    em:name="Accentuate.us"
                    em:description="Accentuate.us allows you to type quickly and easily in more than 100 languages without extra keystrokes or a special keyboard."
-                   em:version="1.0b1"
+                   em:version="0.9.1"
                    em:creator="Spearhead Development, L.L.C. (http://spearheaddev.com/)"
                    em:homepageURL="http://accentuate.us/"
                    em:type="2"
