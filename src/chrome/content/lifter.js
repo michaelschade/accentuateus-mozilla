@@ -286,13 +286,13 @@ Charlifter.Chunk = function(elem) {
                     }
                     elem.span.parentNode.removeChild(elem.span);
                     elem.value = result.begin + text + result.end;
-                } else { elem.innerHTML = text }
+                } else { elem.innerHTML = text; }
             } else if (selected) {
                 elem.value = result.begin + text + result.end;
                 elem.setSelectionRange(result.stop, result.stop);
             } else {
                 let pos = elem.selectionStart;
-                elem.value = text
+                elem.value = text;
                 elem.setSelectionRange(pos, pos);
             }
         },
