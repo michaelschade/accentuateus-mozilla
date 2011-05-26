@@ -163,9 +163,9 @@ Charlifter.SQL = function() {
         if (db === null) {
             let file = Charlifter.Util.getFile("accentuateus.sqlite");
             let storageService = Components.classes["@mozilla.org/storage"
-                                 + "/service;1"]
-                                    .getService(Components.interfaces
-                                        .mozIStorageService);
+                + "/service;1"].getService(
+                    Components.interfaces.mozIStorageService
+                );
             try {
                 db = storageService.openDatabase(file);
                 // Initialize lang table if not in existence
@@ -239,7 +239,7 @@ Charlifter.SQL = function() {
                 + "== :code LIMIT 1");
             statement.params.code = code;
             statement.executeAsync(callbacks);
-        },
+        }
     }
 }();
 
@@ -303,7 +303,8 @@ Charlifter.Chunk = function(elem) {
                 if (selected) { return result.span.innerHTML; }
                 else { return elem.innerHTML; }
             } else if (selected && !all) {
-                return elem.value.substring(elem.selectionStart, elem.selectionEnd);
+                return elem.value.substring(elem.selectionStart
+                    , elem.selectionEnd);
             } else { return elem.value; }
         },
         init : function() {
@@ -324,7 +325,8 @@ Charlifter.Chunk = function(elem) {
                     result.begin= elem.value.substring(0, elem.selectionStart);
                     result.end  = elem.value.substring(elem.selectionEnd);
                     result.stop = elem.selectionEnd;
-                    value = elem.value.substring(elem.selectionStart, elem.selectionEnd);
+                    value = elem.value.substring(elem.selectionStart
+                        , elem.selectionEnd);
                 }
                 selected = true;
             }
@@ -352,7 +354,7 @@ Charlifter.Chunk = function(elem) {
                 replace = stripFstWord(stripLstWord(replace));
             }
             this.setText(this.getText(all).replace(search, replace));
-        },
+        }
     }
 };
 
@@ -415,13 +417,14 @@ Charlifter.Lifter = function() {
                     menupopup.removeItemAt(0);
                 }
                 for (let row=aResultSet.getNextRow();
-                    row; row=aResultSet.getNextRow()) {
-                        // Store for processing after query completion
-                        langsArray[langs] = [
-                              row.getResultByName("code")
-                            , row.getResultByName("localization")
-                        ];
-                        langs++;
+                    row; row=aResultSet.getNextRow())
+                {
+                    // Store for processing after query completion
+                    langsArray[langs] = [
+                          row.getResultByName("code")
+                        , row.getResultByName("localization")
+                    ];
+                    langs++;
                 }
             },
             handleError: function(aError) {
@@ -440,7 +443,7 @@ Charlifter.Lifter = function() {
                         "Charlifter.Lifter.liftSelection('" + code + "')"
                     );
                 }
-            },
+            }
         });
     };
     let S4 = function() {
@@ -470,7 +473,7 @@ Charlifter.Lifter = function() {
                     , strbundle.getString(
                         "errors-lang-localization"));
             },
-            handleCompletion: function(aCompletion) {},
+            handleCompletion: function(aCompletion) {}
         });
         liftItem.setAttribute("oncommand",
             "Charlifter.Lifter.liftSelection('" + lang + "')");
@@ -521,7 +524,7 @@ Charlifter.Lifter = function() {
                 handleCompletion: function(aC) {
                     Charlifter.Lifter.populateLangTable();
                     setLastLang();
-                },
+                }
             });
         },
         liveOn : function() {
@@ -923,7 +926,7 @@ Charlifter.Lifter = function() {
                     }
                 }
             }
-        },
+        }
     }
 }();
 
