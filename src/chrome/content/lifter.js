@@ -439,9 +439,9 @@ Charlifter.Lifter = function() {
                     let code = langsArray[l][0], local = langsArray[l][1];
                     // Add to context menu
                     let ele = langsMenu.appendItem(code + ": " + local, code);
-                    ele.setAttribute("oncommand",
-                        "Charlifter.Lifter.liftSelection('" + code + "')"
-                    );
+                    ele.addEventListener('command', function() {
+                        Charlifter.Lifter.liftSelection(code);
+                    }, false);
                 }
             }
         });
@@ -452,7 +452,8 @@ Charlifter.Lifter = function() {
     let uuid = function() {
        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
     }
-    let setLastLang = function() {
+    let liftLastLang = null;
+    let setLastLang  = function() {
         /* Sets context menu default last language */
         let liftItem = document.getElementById(
             "charlifter-cmenu-item-lift");
@@ -475,8 +476,13 @@ Charlifter.Lifter = function() {
             },
             handleCompletion: function(aCompletion) {}
         });
-        liftItem.setAttribute("oncommand",
-            "Charlifter.Lifter.liftSelection('" + lang + "')");
+        if (liftLastLang != null) {
+            liftItem.removeEventListener('command', liftLastLang, false);
+        }
+        liftLastLang = function() {
+            Charlifter.Lifter.liftSelection(lang);
+        };
+        liftItem.addEventListener('command', liftLastLang, false);
     };
     let getLocale = function() {
         let locale = window.navigator.language;
@@ -748,7 +754,6 @@ Charlifter.Lifter = function() {
                         //this.attache(evt.target);
                         break;
                     case 'iframe':
-                        //alert('Gotcha.');
                         try {
                         this.attach(evt.target.contentWindow.document);
                         } catch(e) { }//alert(e); }
