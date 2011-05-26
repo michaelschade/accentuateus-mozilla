@@ -14,8 +14,17 @@
                    em:creator="Spearhead Development, L.L.C. (http://spearheaddev.com/)"
                    em:homepageURL="http://accentuate.us/"
                    em:type="2"
-                   em:aboutURL="chrome://accentuateus/content/about.xul">
+                   em:aboutURL="chrome://accentuateus/content/about.xul"
+                   em:updateURL="http://accentuate.us/get/firefox/update"
+                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDSlJ5qYIi8uz8Y/bKv4wE9afVFfQXXLDxOvTBMmyeex9nyYjIHODMxUimXMmp0BgD5PwOptyL16lcd/ZtJJmPBH3EtonwJ+fzqIVdpzii9lFqkELRW4ySu5hvAFMBGCQYX1a+JDIHLx6m+VYzpDylTuNCMojpmW63DwQTpHQ7OnwIDAQAB">
     <em:targetApplication RDF:resource="rdf:#$v5LjR"/>
+    <em:localized>
+      <Description>
+        <em:locale>gd</em:locale>
+        <em:name>Accentuate.us</em:name>
+        <em:description>Tha an tuilleadan seo 'na eadar-aghaidh a chum na seirbheise cànain Accentuate.us, nì a bheir comas dhut taidhpeadh gu furasta, sgiobalta, coileanta ann am barrachd air 100 cànan as aonais ath-ghoiridean sònraichte air do mheur-chlàr no fiù meur-chlàr sònraichte.</em:description>
+      </Description>
+    </em:localized>
     <em:localized>
       <Description>
         <em:locale>en-IE</em:locale>
