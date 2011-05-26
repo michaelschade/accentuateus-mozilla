@@ -114,7 +114,7 @@ locale  accentuateus  zh-TW    chrome/locale/zh-TW/
 locale  accentuateus  zu    chrome/locale/zu/
 
 overlay chrome://browser/content/browser.xul chrome://accentuateus/content/lifter.xul
-overlay chrome://browser/content/browser.xul chrome://accentuateus/content/toolbar.xul
+#overlay chrome://browser/content/browser.xul chrome://accentuateus/content/toolbar.xul
 
 skin    accentuateus classic/1.0 chrome/skin/
-style   chrome://global/content/customizeToolbar.xul chrome://accentuateus/skin/toolbar.css
+#style   chrome://global/content/customizeToolbar.xul chrome://accentuateus/skin/toolbar.css
