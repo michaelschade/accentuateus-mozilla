@@ -485,7 +485,7 @@ Charlifter.Lifter = function() {
         liftItem.addEventListener('command', liftLastLang, false);
     };
     let getLocale = function() {
-        let locale = window.navigator.language;
+        let locale = prefs.getCharPref("general.useragent.locale");
         try {
             locale = prefs.getBranch("extensions.accentuateus.debug.")
                 .getCharPref("locale");
