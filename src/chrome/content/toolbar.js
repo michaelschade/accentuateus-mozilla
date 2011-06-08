@@ -1,5 +1,5 @@
 /*
-    Copyright 2010 Spearhead Development, L.L.C. <http://www.sddomain.com/>
+    Copyright 2010 Spearhead Development, L.L.C. <http://www.spearheaddev.com/>
     
     This file is part of Accentuate.us.
     
