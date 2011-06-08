@@ -525,6 +525,7 @@ Charlifter.Lifter = function() {
             firstRun = aprefs.getBoolPref('firstRun');
             if (firstRun) {
                 aprefs.setBoolPref('firstRun', false);
+                aprefs.setCharPref('version', version);
             }
 
             /* Create dynamic menu of available languages */

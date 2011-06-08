@@ -18,6 +18,7 @@
 */
 
 pref('extensions.accentuateus.firstRun',                    true);
+pref('extensions.accentuateus.version',                     '0');
 
 pref('extensions.accentuateus.languages.version',           0);
 pref('extensions.accentuateus.languages.locale',            'en-US');
