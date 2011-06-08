@@ -366,13 +366,15 @@ Charlifter.Lifter = function() {
         , langListOutdated  : 100
         , langListCurrent   : 200
     };
-    let prefs   = Components.classes["@mozilla.org/preferences-service;1"]
-        .getService(Components.interfaces.nsIPrefService);
     let prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
         .getService(Ci.nsIPromptService);
+    let prefs   = Components.classes["@mozilla.org/preferences-service;1"]
+        .getService(Components.interfaces.nsIPrefService);
+    let aprefs  = prefs.getBranch("extensions.accentuateus.");
     let cprefs  = prefs.getBranch("extensions.accentuateus.languages.");
     let version = 'err';
     let cid     = "_-accentuateus-id"; // Charlifter attribute name
+    let firstRun    = null;
     let pageElements= {};
     let chunks      = {};
     let livefns     = {};
@@ -459,6 +461,7 @@ Charlifter.Lifter = function() {
             "charlifter-cmenu-item-lift");
         let lang = cprefs.getCharPref("selection-code");
         liftItem.hidden = true; // Default to hidden
+
         Charlifter.SQL.getLangLocalization(lang, {
             handleResult: function(aResult) {
                 lastLang.lang = lang;
@@ -468,14 +471,16 @@ Charlifter.Lifter = function() {
             },
             handleError: function(aError) {
                 Charlifter.Util.log(aError);
-                prompts.alert(window
-                    , strbundle.getString(
-                        "errors-lang-localization-title")
-                    , strbundle.getString(
-                        "errors-lang-localization"));
+                prompts.alert(
+                      window
+                    , strbundle.getString("errors-lang-localization-title")
+                    , strbundle.getString("errors-lang-localization")
+                );
             },
             handleCompletion: function(aCompletion) {}
         });
+
+        /* Setup menu items */
         if (liftLastLang != null) {
             liftItem.removeEventListener('command', liftLastLang, false);
         }
@@ -515,6 +520,13 @@ Charlifter.Lifter = function() {
                 "charlifter-cmenu-item-lift");
             liftItem.setAttribute('accesskey', strbundle.getString(
                 "lift-citem-label-accesskey"));
+
+            /* Add-On First Run */
+            firstRun = aprefs.getBoolPref('firstRun');
+            if (firstRun) {
+                aprefs.setBoolPref('firstRun', false);
+            }
+
             /* Create dynamic menu of available languages */
             let contextMenu = document.getElementById("contentAreaContextMenu");
             contextMenu.addEventListener("popupshowing", this.readyContextMenu
@@ -529,10 +541,11 @@ Charlifter.Lifter = function() {
                 handleError: function(aE) { Charlifter.Util.log(aE); },
                 handleCompletion: function(aC) {
                     Charlifter.Lifter.populateLangTable();
-                    setLastLang();
+                    Charlifter.Lifter.setLastLang();
                 }
             });
         },
+        setLastLang : function() { setLastLang(); },
         liveOn : function() {
             let num = gBrowser.browsers.length;
             for (let i = 0; i < num; i++) {
@@ -566,8 +579,14 @@ Charlifter.Lifter = function() {
                         /* New list available. Clear old languages
                             and insert new list to database. */
                         let langs = response.text.split('\n');
+                        let locale = getLocale();
                         for (let langPair in langs) {
                             langs[langPair] = langs[langPair].split(':');
+                            if (firstRun && locale == langs[langPair][0]) {
+                                let lang = langs[langPair][0];
+                                cprefs.setCharPref("selection-code", lang);
+                                Charlifter.Lifter.setLastLang();
+                            }
                         }
                         Charlifter.SQL.clearLangs({
                             handleResult: function(aResultSet) {},

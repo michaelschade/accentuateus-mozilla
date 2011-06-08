@@ -17,8 +17,10 @@
     along with Accentuate.us. If not, see <http://www.gnu.org/licenses/>.
 */
 
-pref('extensions.accentuateus.languages.version',               0);
-pref('extensions.accentuateus.languages.locale',                'en-US');
-pref('extensions.accentuateus.languages.selection-code',        'ga');
-pref('extensions.accentuateus.languages.feedback-success',      false);
+pref('extensions.accentuateus.firstRun',                    true);
+
+pref('extensions.accentuateus.languages.version',           0);
+pref('extensions.accentuateus.languages.locale',            'en-US');
+pref('extensions.accentuateus.languages.selection-code',    'ga');
+pref('extensions.accentuateus.languages.feedback-success',  false);
 pref('extensions.accentuateus.languages.feedback-success-hide', false);
